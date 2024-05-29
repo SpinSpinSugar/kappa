@@ -8,25 +8,31 @@
 #ifndef TWOBLUECUBES_CATCH_TAG_ALIAS_H_INCLUDED
 #define TWOBLUECUBES_CATCH_TAG_ALIAS_H_INCLUDED
 
-#include "catch_common.h"
-
 #include <string>
+
+#include "catch_common.h"
 
 namespace Catch {
 
-    struct TagAlias {
-        TagAlias( std::string const& _tag, SourceLineInfo _lineInfo ) : tag( _tag ), lineInfo( _lineInfo ) {}
+struct TagAlias {
+  TagAlias(std::string const &_tag, SourceLineInfo _lineInfo)
+      : tag(_tag), lineInfo(_lineInfo) {}
 
-        std::string tag;
-        SourceLineInfo lineInfo;
-    };
+  std::string tag;
+  SourceLineInfo lineInfo;
+};
 
-    struct RegistrarForTagAliases {
-        RegistrarForTagAliases( char const* alias, char const* tag, SourceLineInfo const& lineInfo );
-    };
+struct RegistrarForTagAliases {
+  RegistrarForTagAliases(char const *alias, char const *tag,
+                         SourceLineInfo const &lineInfo);
+};
 
-} // end namespace Catch
+}  // end namespace Catch
 
-#endif // TWOBLUECUBES_CATCH_TAG_ALIAS_H_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_TAG_ALIAS_H_INCLUDED
 
-#define CATCH_REGISTER_TAG_ALIAS( alias, spec ) namespace{ Catch::RegistrarForTagAliases INTERNAL_CATCH_UNIQUE_NAME( AutoRegisterTagAlias )( alias, spec, CATCH_INTERNAL_LINEINFO ); }
+#define CATCH_REGISTER_TAG_ALIAS(alias, spec)                      \
+  namespace {                                                      \
+  Catch::RegistrarForTagAliases INTERNAL_CATCH_UNIQUE_NAME(        \
+      AutoRegisterTagAlias)(alias, spec, CATCH_INTERNAL_LINEINFO); \
+  }

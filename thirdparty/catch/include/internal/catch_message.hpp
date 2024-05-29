@@ -12,38 +12,33 @@
 
 namespace Catch {
 
-    MessageInfo::MessageInfo(   std::string const& _macroName,
-                                SourceLineInfo const& _lineInfo,
-                                ResultWas::OfType _type )
-    :   macroName( _macroName ),
-        lineInfo( _lineInfo ),
-        type( _type ),
-        sequence( ++globalCount )
-    {}
+MessageInfo::MessageInfo(std::string const &_macroName,
+                         SourceLineInfo const &_lineInfo,
+                         ResultWas::OfType _type)
+    : macroName(_macroName),
+      lineInfo(_lineInfo),
+      type(_type),
+      sequence(++globalCount) {}
 
-    // This may need protecting if threading support is added
-    unsigned int MessageInfo::globalCount = 0;
+// This may need protecting if threading support is added
+unsigned int MessageInfo::globalCount = 0;
 
+////////////////////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////////////////////////////////////////
+ScopedMessage::ScopedMessage(MessageBuilder const &builder)
+    : m_info(builder.m_info) {
+  m_info.message = builder.m_stream.str();
+  getResultCapture().pushScopedMessage(m_info);
+}
+ScopedMessage::ScopedMessage(ScopedMessage const &other)
+    : m_info(other.m_info) {}
 
-    ScopedMessage::ScopedMessage( MessageBuilder const& builder )
-    : m_info( builder.m_info )
-    {
-        m_info.message = builder.m_stream.str();
-        getResultCapture().pushScopedMessage( m_info );
-    }
-    ScopedMessage::ScopedMessage( ScopedMessage const& other )
-    : m_info( other.m_info )
-    {}
+ScopedMessage::~ScopedMessage() {
+  if (!std::uncaught_exception()) {
+    getResultCapture().popScopedMessage(m_info);
+  }
+}
 
-    ScopedMessage::~ScopedMessage() {
-        if ( !std::uncaught_exception() ){
-            getResultCapture().popScopedMessage(m_info);
-        }
-    }
+}  // end namespace Catch
 
-
-} // end namespace Catch
-
-#endif // TWOBLUECUBES_CATCH_MESSAGE_HPP_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_MESSAGE_HPP_INCLUDED

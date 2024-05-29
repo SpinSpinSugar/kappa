@@ -30,7 +30,7 @@ cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 cmake_policy(SET CMP0048 NEW)
 # Enable IPO for CMake versions that support it
 #cmake_policy(SET CMP0069 NEW)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(kappa++
@@ -46,10 +46,10 @@ project(kappa++
 ################################################################################
 
 # Profile
- set(CMAKE_CXX_FLAGS_PROFILE "-g3 -Wall -O3 -DNDEBUG" CACHE STRING
+ set(CMAKE_CXX_FLAGS_PROFILE "-g3 -Wall -O3 -flto -DNDEBUG" CACHE STRING
     "Flags used by the C++ compiler during Profile builds."
     FORCE )
- set(CMAKE_C_FLAGS_PROFILE "-g3 -Wall -pedantic -O3 -DNDEBUG" CACHE STRING
+ set(CMAKE_C_FLAGS_PROFILE "-g3 -Wall -pedantic -flto -O3 -DNDEBUG" CACHE STRING
     "Flags used by the C compiler during Profile builds."
     FORCE )
  set(CMAKE_EXE_LINKER_FLAGS_PROFILE
@@ -85,7 +85,7 @@ project(kappa++
     "Install path prefix, prepended onto install directories." FORCE)
  mark_as_advanced(CMAKE_INSTALL_PREFIX)
 
- set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -lm -pg" )
+ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++17 -lm -pg -lyaml-cpp -larmadillo -fopenmp" )
 
  if (CMAKE_COMPILER_IS_GNUCXX)
 

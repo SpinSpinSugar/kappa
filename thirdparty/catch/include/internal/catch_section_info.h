@@ -8,34 +8,34 @@
 #ifndef TWOBLUECUBES_CATCH_SECTION_INFO_H_INCLUDED
 #define TWOBLUECUBES_CATCH_SECTION_INFO_H_INCLUDED
 
+#include <string>
+
 #include "catch_common.h"
 #include "catch_totals.hpp"
 
-#include <string>
-
 namespace Catch {
 
-    struct SectionInfo {
-        SectionInfo
-            (   SourceLineInfo const& _lineInfo,
-                std::string const& _name,
-                std::string const& _description = std::string() );
+struct SectionInfo {
+  SectionInfo(SourceLineInfo const &_lineInfo, std::string const &_name,
+              std::string const &_description = std::string());
 
-        std::string name;
-        std::string description;
-        SourceLineInfo lineInfo;
-    };
+  std::string name;
+  std::string description;
+  SourceLineInfo lineInfo;
+};
 
-    struct SectionEndInfo {
-        SectionEndInfo( SectionInfo const& _sectionInfo, Counts const& _prevAssertions, double _durationInSeconds )
-        : sectionInfo( _sectionInfo ), prevAssertions( _prevAssertions ), durationInSeconds( _durationInSeconds )
-        {}
+struct SectionEndInfo {
+  SectionEndInfo(SectionInfo const &_sectionInfo, Counts const &_prevAssertions,
+                 double _durationInSeconds)
+      : sectionInfo(_sectionInfo),
+        prevAssertions(_prevAssertions),
+        durationInSeconds(_durationInSeconds) {}
 
-        SectionInfo sectionInfo;
-        Counts prevAssertions;
-        double durationInSeconds;
-    };
+  SectionInfo sectionInfo;
+  Counts prevAssertions;
+  double durationInSeconds;
+};
 
-} // end namespace Catch
+}  // end namespace Catch
 
-#endif // TWOBLUECUBES_CATCH_SECTION_INFO_H_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_SECTION_INFO_H_INCLUDED

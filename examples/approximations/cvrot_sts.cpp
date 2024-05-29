@@ -3,9 +3,9 @@
    \brief test for rotational specific heat at constant volume for STS approach
 */
 
-#include <fstream>
-#include <iomanip> 
 #include <cstdlib>
+#include <fstream>
+#include <iomanip>
 #include <iostream>
 
 #ifdef WINDOWS
@@ -18,23 +18,22 @@
 
 #include "kappa.hpp"
 
-std::string GetCurrentWorkingDir( void ) {
+std::string GetCurrentWorkingDir(void) {
   char buff[FILENAME_MAX];
-  GetCurrentDir( buff, FILENAME_MAX );
+  GetCurrentDir(buff, FILENAME_MAX);
   std::string current_working_dir(buff);
-  return current_working_dir;      	     
-}  
+  return current_working_dir;
+}
 
 using namespace std;
 using namespace kappa;
-using namespace arma; 
+using namespace arma;
 
-int main(){
-
+int main() {
   // Retrieve the kappa data path from environment variable defined in ~/.bashrc
   std::string m_source = std::getenv("KAPPA_DATA_DIRECTORY");
   std::cout << "KAPPA_DATA_DIRECTORY is: " << m_source << '\n';
-  std::string particle_source    = m_source + "particles.yaml";
+  std::string particle_source = m_source + "particles.yaml";
   std::string interaction_source = m_source + "interaction.yaml";
   std::string output_dir = GetCurrentWorkingDir();
   std::cout << "Current directory is: " << output_dir << std::endl;
@@ -57,7 +56,7 @@ int main(){
 
   molecules.push_back(MoleculeN2);
   atoms.push_back(AtomN);
-  
+
   // create mixture
   kappa::Mixture mixture(molecules, atoms, interaction_source, particle_source);
 
@@ -67,10 +66,10 @@ int main(){
   std::cout << std::setw(20) << "T [K]";
   std::cout << std::setw(25) << "Rot. specific heat capacity, cv_rot";
   std::cout << std::endl;
-  
+
   std::vector<arma::vec> mol_ndens;
   arma::vec atom_ndens(1);
-  int x_atom_perc = 50.; // assume a certain atom percentage
+  int x_atom_perc = 50.;  // assume a certain atom percentage
   double x_atom = x_atom_perc / 100.;
   atom_ndens[0] = x_atom * tot_ndens;
 
@@ -79,49 +78,51 @@ int main(){
   // }
 
   // compute boltzmann distribution
-  mol_ndens.push_back(mixture.Boltzmann_distribution(T, (1.-x_atom) * tot_ndens, MoleculeN2));
+  mol_ndens.push_back(
+      mixture.Boltzmann_distribution(T, (1. - x_atom) * tot_ndens, MoleculeN2));
   while (T <= 3000.0) {
-
     // mixture number density
     tot_ndens = p / (kappa::K_CONST_K * T);
- 
-    mol_ndens[0] = mixture.Boltzmann_distribution(T, (1.-x_atom) * tot_ndens, MoleculeN2);
+
+    mol_ndens[0] = mixture.Boltzmann_distribution(T, (1. - x_atom) * tot_ndens,
+                                                  MoleculeN2);
 
     // for (auto i=mol_ndens.begin(); i!=mol_ndens.end(); ++i) {
     //   std::cout << " mol_ndens " << (*i) << std::endl;
     // }
 
     // mixture mass density
-    rho = mixture.compute_density(mol_ndens, atom_ndens); 
+    rho = mixture.compute_density(mol_ndens, atom_ndens);
     // std::cout << " rho " << rho << std::endl;
 
     // mixture pressure
-    pressure = mixture.compute_pressure(T, mol_ndens, atom_ndens); 
+    pressure = mixture.compute_pressure(T, mol_ndens, atom_ndens);
     // std::cout << " pressure " << pressure << std::endl;
 
-    n = mixture.compute_n(mol_ndens, atom_ndens); 
-    n_at = mixture.compute_n(atom_ndens); 
-    n_mol = mixture.compute_n(mol_ndens); 
- 
+    n = mixture.compute_n(mol_ndens, atom_ndens);
+    n_at = mixture.compute_n(atom_ndens);
+    n_mol = mixture.compute_n(mol_ndens);
+
     // cross-check, eq. 1.23
     cv_rot = kappa::K_CONST_K / MoleculeN2.mass;
 
     int c_rot = 0;
-    for (int i=0; i<MoleculeN2.num_vibr_levels[0]; i++) {
+    for (int i = 0; i < MoleculeN2.num_vibr_levels[0]; i++) {
       c_rot += approx.c_rot(T, MoleculeN2, i, 0);
     }
 
     std::cout << std::setw(20) << T;
-    std::cout << std::setw(25) << approx.c_rot(T, MoleculeN2) 
-              << std::setw(20) << cv_rot;
+    std::cout << std::setw(25) << approx.c_rot(T, MoleculeN2) << std::setw(20)
+              << cv_rot;
     std::cout << std::endl;
 
     // conservation test
-    double test=0.;
-    for (int i=0; i<mol_ndens[0].size(); i++) {
+    double test = 0.;
+    for (int i = 0; i < mol_ndens[0].size(); i++) {
       test += mol_ndens[0].at(i);
     }
-    // std::cout << " conservation tests (expected value = 1) " << (test + atom_ndens[0]) / n << std::endl;
+    // std::cout << " conservation tests (expected value = 1) " << (test +
+    // atom_ndens[0]) / n << std::endl;
 
     T += 10;
   }

@@ -1,11 +1,12 @@
-/*! 
+/*!
    \file TestDiffusion.cpp
-   \brief Test for multi-component diffusion coefficients' computation in the StS approach.
+   \brief Test for multi-component diffusion coefficients' computation in the
+   StS approach.
  */
 
-#include <iostream>
 #include <fstream>
-#include <iomanip> 
+#include <iomanip>
+#include <iostream>
 
 #ifdef WINDOWS
 #include <direct.h>
@@ -19,20 +20,20 @@
 
 using namespace kappa;
 
-std::string GetCurrentWorkingDir( void ) {
+std::string GetCurrentWorkingDir(void) {
   char buff[FILENAME_MAX];
-  GetCurrentDir( buff, FILENAME_MAX );
+  GetCurrentDir(buff, FILENAME_MAX);
   std::string current_working_dir(buff);
   return current_working_dir;
 }
 
-int main(int argc, char** argv) {
-   
-  std::cout << "Start test: computation of thermal diffusion coefficients" << std::endl;
-  
+int main(int argc, char **argv) {
+  std::cout << "Start test: computation of thermal diffusion coefficients"
+            << std::endl;
+
   std::string m_source = std::getenv("KAPPA_DATA_DIRECTORY");
   std::cout << "KAPPA_DATA_DIRECTORY is: " << m_source << '\n';
-  std::string particle_source    = m_source + "particles.yaml";
+  std::string particle_source = m_source + "particles.yaml";
   std::string interaction_source = m_source + "interaction.yaml";
   std::string output_dir = GetCurrentWorkingDir();
   std::cout << "Current directory is: " << output_dir << std::endl;
@@ -41,7 +42,7 @@ int main(int argc, char** argv) {
 
   // N2 molecule (non-rigid model)
   kappa::Molecule mol("N2", true, false, particle_source);
- 
+
   // N atom
   kappa::Atom at("N", particle_source);
 
@@ -49,7 +50,8 @@ int main(int argc, char** argv) {
 
   std::cout << "Molecule's name " << mol.name << std::endl;
   std::cout << "Atom's name " << at.name << std::endl;
-  std::cout << "Molecule vibrational levels " << mol.num_vibr_levels[0] << std::endl;
+  std::cout << "Molecule vibrational levels " << mol.num_vibr_levels[0]
+            << std::endl;
 
   // N2/N binary mixture creation
   kappa::Mixture mixture(mol, at, interaction_source, particle_source);
@@ -86,40 +88,43 @@ int main(int argc, char** argv) {
   std::vector<arma::vec> mol_ndens;
 
   double tot_ndens;
-  tot_ndens =  p / (kappa::K_CONST_K * T_vals[0]);
+  tot_ndens = p / (kappa::K_CONST_K * T_vals[0]);
   std::cout << " tot_ndens " << tot_ndens << std::endl;
 
-  mol_ndens.push_back(mixture.Boltzmann_distribution(T_vals[0], (1. - x_atom) * tot_ndens, mol));
+  mol_ndens.push_back(mixture.Boltzmann_distribution(
+      T_vals[0], (1. - x_atom) * tot_ndens, mol));
 
   // atom number density
   atom_ndens = x_atom * tot_ndens;
 
-  for (int at=0; at<atom_ndens.size(); at++) {
+  for (int at = 0; at < atom_ndens.size(); at++) {
     std::cout << " atom_ndens " << atom_ndens.at(at) << std::endl;
   }
 
   std::ofstream outf;
-  outf.open(output_dir + "/diff_" + mol.name + "_" + at.name + "_xat" + std::to_string(x_atom_perc) + ".txt");
+  outf.open(output_dir + "/diff_" + mol.name + "_" + at.name + "_xat" +
+            std::to_string(x_atom_perc) + ".txt");
 
   // output files' header
-  outf << std::setw(20) << "Temperature [K]"; 
-  outf << std::setw(20) << "Diff. coeffs."; 
+  outf << std::setw(20) << "Temperature [K]";
+  outf << std::setw(20) << "Diff. coeffs.";
   outf << std::endl;
 
   std::cout << std::setw(20) << "Temperature [K]" << std::endl;
 
-  mixture.compute_transport_coefficients(T_vals[0], mol_ndens, atom_ndens, 0, models_omega::model_omega_rs, 0.0);
-  //mixture.compute_transport_coefficients(T_vals[0], mol_ndens, atom_ndens);
+  mixture.compute_transport_coefficients(T_vals[0], mol_ndens, atom_ndens, 0,
+                                         models_omega::model_omega_rs, 0.0);
+  // mixture.compute_transport_coefficients(T_vals[0], mol_ndens, atom_ndens);
   mixture.get_diffusion();
-    
+
   std::cout << "mixture.get_diffusion()" << std::endl;
   std::cout << std::setw(20) << mixture.get_diffusion() << std::endl;
   outf << std::setw(20) << T_vals[0] << std::endl;
   outf << std::setw(20) << mixture.get_diffusion() << std::endl;
 
- // simplified binary diffusion coefficients (for checking)
- // mixture.binary_diffusion(T_vals[0]);
- // mixture.binary_diffusion(T);
+  // simplified binary diffusion coefficients (for checking)
+  // mixture.binary_diffusion(T_vals[0]);
+  // mixture.binary_diffusion(T);
 
   return 0;
 }

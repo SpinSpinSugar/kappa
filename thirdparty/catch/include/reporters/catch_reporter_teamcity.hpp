@@ -17,206 +17,198 @@
 #include <cstring>
 
 #ifdef __clang__
-#   pragma clang diagnostic push
-#   pragma clang diagnostic ignored "-Wpadded"
-#   pragma clang diagnostic ignored "-Wc++98-compat"
-#   pragma clang diagnostic ignored "-Wc++98-compat-pedantic"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
+#pragma clang diagnostic ignored "-Wc++98-compat"
+#pragma clang diagnostic ignored "-Wc++98-compat-pedantic"
 #endif
 
 namespace Catch {
 
-    struct TeamCityReporter : StreamingReporterBase {
-        TeamCityReporter( ReporterConfig const& _config )
-        :   StreamingReporterBase( _config ),
-            m_headerPrintedForThisSection( false )
-        {
-            m_reporterPrefs.shouldRedirectStdOut = true;
-        }
+struct TeamCityReporter : StreamingReporterBase {
+  TeamCityReporter(ReporterConfig const &_config)
+      : StreamingReporterBase(_config), m_headerPrintedForThisSection(false) {
+    m_reporterPrefs.shouldRedirectStdOut = true;
+  }
 
-        static std::string escape( std::string const& str ) {
-            std::string escaped = str;
-            replaceInPlace( escaped, "|", "||" );
-            replaceInPlace( escaped, "'", "|'" );
-            replaceInPlace( escaped, "\n", "|n" );
-            replaceInPlace( escaped, "\r", "|r" );
-            replaceInPlace( escaped, "[", "|[" );
-            replaceInPlace( escaped, "]", "|]" );
-            return escaped;
-        }
-        virtual ~TeamCityReporter() CATCH_OVERRIDE;
+  static std::string escape(std::string const &str) {
+    std::string escaped = str;
+    replaceInPlace(escaped, "|", "||");
+    replaceInPlace(escaped, "'", "|'");
+    replaceInPlace(escaped, "\n", "|n");
+    replaceInPlace(escaped, "\r", "|r");
+    replaceInPlace(escaped, "[", "|[");
+    replaceInPlace(escaped, "]", "|]");
+    return escaped;
+  }
+  virtual ~TeamCityReporter() CATCH_OVERRIDE;
 
-        static std::string getDescription() {
-            return "Reports test results as TeamCity service messages";
-        }
+  static std::string getDescription() {
+    return "Reports test results as TeamCity service messages";
+  }
 
-        virtual void skipTest( TestCaseInfo const& /* testInfo */ ) CATCH_OVERRIDE {
-        }
+  virtual void skipTest(TestCaseInfo const & /* testInfo */) CATCH_OVERRIDE {}
 
-        virtual void noMatchingTestCases( std::string const& /* spec */ ) CATCH_OVERRIDE {}
+  virtual void noMatchingTestCases(std::string const & /* spec */)
+      CATCH_OVERRIDE {}
 
-        virtual void testGroupStarting( GroupInfo const& groupInfo ) CATCH_OVERRIDE {
-            StreamingReporterBase::testGroupStarting( groupInfo );
-            stream << "##teamcity[testSuiteStarted name='"
-                << escape( groupInfo.name ) << "']\n";
-        }
-        virtual void testGroupEnded( TestGroupStats const& testGroupStats ) CATCH_OVERRIDE {
-            StreamingReporterBase::testGroupEnded( testGroupStats );
-            stream << "##teamcity[testSuiteFinished name='"
-                << escape( testGroupStats.groupInfo.name ) << "']\n";
-        }
+  virtual void testGroupStarting(GroupInfo const &groupInfo) CATCH_OVERRIDE {
+    StreamingReporterBase::testGroupStarting(groupInfo);
+    stream << "##teamcity[testSuiteStarted name='" << escape(groupInfo.name)
+           << "']\n";
+  }
+  virtual void testGroupEnded(TestGroupStats const &testGroupStats)
+      CATCH_OVERRIDE {
+    StreamingReporterBase::testGroupEnded(testGroupStats);
+    stream << "##teamcity[testSuiteFinished name='"
+           << escape(testGroupStats.groupInfo.name) << "']\n";
+  }
 
+  virtual void assertionStarting(AssertionInfo const &) CATCH_OVERRIDE {}
 
-        virtual void assertionStarting( AssertionInfo const& ) CATCH_OVERRIDE {
-        }
+  virtual bool assertionEnded(AssertionStats const &assertionStats)
+      CATCH_OVERRIDE {
+    AssertionResult const &result = assertionStats.assertionResult;
+    if (!result.isOk()) {
+      std::ostringstream msg;
+      if (!m_headerPrintedForThisSection) printSectionHeader(msg);
+      m_headerPrintedForThisSection = true;
 
-        virtual bool assertionEnded( AssertionStats const& assertionStats ) CATCH_OVERRIDE {
-            AssertionResult const& result = assertionStats.assertionResult;
-            if( !result.isOk() ) {
+      msg << result.getSourceInfo() << "\n";
 
-                std::ostringstream msg;
-                if( !m_headerPrintedForThisSection )
-                    printSectionHeader( msg );
-                m_headerPrintedForThisSection = true;
+      switch (result.getResultType()) {
+        case ResultWas::ExpressionFailed:
+          msg << "expression failed";
+          break;
+        case ResultWas::ThrewException:
+          msg << "unexpected exception";
+          break;
+        case ResultWas::FatalErrorCondition:
+          msg << "fatal error condition";
+          break;
+        case ResultWas::DidntThrowException:
+          msg << "no exception was thrown where one was expected";
+          break;
+        case ResultWas::ExplicitFailure:
+          msg << "explicit failure";
+          break;
 
-                msg << result.getSourceInfo() << "\n";
+        // We shouldn't get here because of the isOk() test
+        case ResultWas::Ok:
+        case ResultWas::Info:
+        case ResultWas::Warning:
 
-                switch( result.getResultType() ) {
-                    case ResultWas::ExpressionFailed:
-                        msg << "expression failed";
-                        break;
-                    case ResultWas::ThrewException:
-                        msg << "unexpected exception";
-                        break;
-                    case ResultWas::FatalErrorCondition:
-                        msg << "fatal error condition";
-                        break;
-                    case ResultWas::DidntThrowException:
-                        msg << "no exception was thrown where one was expected";
-                        break;
-                    case ResultWas::ExplicitFailure:
-                        msg << "explicit failure";
-                        break;
+        // These cases are here to prevent compiler warnings
+        case ResultWas::Unknown:
+        case ResultWas::FailureBit:
+        case ResultWas::Exception:
+          CATCH_NOT_IMPLEMENTED;
+      }
+      if (assertionStats.infoMessages.size() == 1) msg << " with message:";
+      if (assertionStats.infoMessages.size() > 1) msg << " with messages:";
+      for (std::vector<MessageInfo>::const_iterator
+               it = assertionStats.infoMessages.begin(),
+               itEnd = assertionStats.infoMessages.end();
+           it != itEnd; ++it)
+        msg << "\n  \"" << it->message << "\"";
 
-                    // We shouldn't get here because of the isOk() test
-                    case ResultWas::Ok:
-                    case ResultWas::Info:
-                    case ResultWas::Warning:
+      if (result.hasExpression()) {
+        msg << "\n  " << result.getExpressionInMacro()
+            << "\n"
+               "with expansion:\n"
+            << "  " << result.getExpandedExpression() << "\n";
+      }
 
-                    // These cases are here to prevent compiler warnings
-                    case ResultWas::Unknown:
-                    case ResultWas::FailureBit:
-                    case ResultWas::Exception:
-                        CATCH_NOT_IMPLEMENTED;
-                }
-                if( assertionStats.infoMessages.size() == 1 )
-                    msg << " with message:";
-                if( assertionStats.infoMessages.size() > 1 )
-                    msg << " with messages:";
-                for( std::vector<MessageInfo>::const_iterator
-                        it = assertionStats.infoMessages.begin(),
-                        itEnd = assertionStats.infoMessages.end();
-                    it != itEnd;
-                    ++it )
-                    msg << "\n  \"" << it->message << "\"";
+      if (currentTestCaseInfo->okToFail()) {
+        msg << "- failure ignore as test marked as 'ok to fail'\n";
+        stream << "##teamcity[testIgnored"
+               << " name='" << escape(currentTestCaseInfo->name) << "'"
+               << " message='" << escape(msg.str()) << "'"
+               << "]\n";
+      } else {
+        stream << "##teamcity[testFailed"
+               << " name='" << escape(currentTestCaseInfo->name) << "'"
+               << " message='" << escape(msg.str()) << "'"
+               << "]\n";
+      }
+    }
+    return true;
+  }
 
+  virtual void sectionStarting(SectionInfo const &sectionInfo) CATCH_OVERRIDE {
+    m_headerPrintedForThisSection = false;
+    StreamingReporterBase::sectionStarting(sectionInfo);
+  }
 
-                if( result.hasExpression() ) {
-                    msg <<
-                        "\n  " << result.getExpressionInMacro() << "\n"
-                        "with expansion:\n" <<
-                        "  " << result.getExpandedExpression() << "\n";
-                }
+  virtual void testCaseStarting(TestCaseInfo const &testInfo) CATCH_OVERRIDE {
+    StreamingReporterBase::testCaseStarting(testInfo);
+    stream << "##teamcity[testStarted name='" << escape(testInfo.name)
+           << "']\n";
+  }
 
-                if( currentTestCaseInfo->okToFail() ) {
-                    msg << "- failure ignore as test marked as 'ok to fail'\n";
-                    stream << "##teamcity[testIgnored"
-                           << " name='" << escape( currentTestCaseInfo->name )<< "'"
-                           << " message='" << escape( msg.str() ) << "'"
-                           << "]\n";
-                }
-                else {
-                    stream << "##teamcity[testFailed"
-                           << " name='" << escape( currentTestCaseInfo->name )<< "'"
-                           << " message='" << escape( msg.str() ) << "'"
-                           << "]\n";
-                }
-            }
-            return true;
-        }
+  virtual void testCaseEnded(TestCaseStats const &testCaseStats)
+      CATCH_OVERRIDE {
+    StreamingReporterBase::testCaseEnded(testCaseStats);
+    if (!testCaseStats.stdOut.empty())
+      stream << "##teamcity[testStdOut name='"
+             << escape(testCaseStats.testInfo.name) << "' out='"
+             << escape(testCaseStats.stdOut) << "']\n";
+    if (!testCaseStats.stdErr.empty())
+      stream << "##teamcity[testStdErr name='"
+             << escape(testCaseStats.testInfo.name) << "' out='"
+             << escape(testCaseStats.stdErr) << "']\n";
+    stream << "##teamcity[testFinished name='"
+           << escape(testCaseStats.testInfo.name) << "']\n";
+  }
 
-        virtual void sectionStarting( SectionInfo const& sectionInfo ) CATCH_OVERRIDE {
-            m_headerPrintedForThisSection = false;
-            StreamingReporterBase::sectionStarting( sectionInfo );
-        }
+ private:
+  void printSectionHeader(std::ostream &os) {
+    assert(!m_sectionStack.empty());
 
-        virtual void testCaseStarting( TestCaseInfo const& testInfo ) CATCH_OVERRIDE {
-            StreamingReporterBase::testCaseStarting( testInfo );
-            stream << "##teamcity[testStarted name='"
-                << escape( testInfo.name ) << "']\n";
-        }
+    if (m_sectionStack.size() > 1) {
+      os << getLineOfChars<'-'>() << "\n";
 
-        virtual void testCaseEnded( TestCaseStats const& testCaseStats ) CATCH_OVERRIDE {
-            StreamingReporterBase::testCaseEnded( testCaseStats );
-            if( !testCaseStats.stdOut.empty() )
-                stream << "##teamcity[testStdOut name='"
-                    << escape( testCaseStats.testInfo.name )
-                    << "' out='" << escape( testCaseStats.stdOut ) << "']\n";
-            if( !testCaseStats.stdErr.empty() )
-                stream << "##teamcity[testStdErr name='"
-                    << escape( testCaseStats.testInfo.name )
-                    << "' out='" << escape( testCaseStats.stdErr ) << "']\n";
-            stream << "##teamcity[testFinished name='"
-                << escape( testCaseStats.testInfo.name ) << "']\n";
-        }
+      std::vector<SectionInfo>::const_iterator
+          it = m_sectionStack.begin() + 1,  // Skip first section (test case)
+          itEnd = m_sectionStack.end();
+      for (; it != itEnd; ++it) printHeaderString(os, it->name);
+      os << getLineOfChars<'-'>() << "\n";
+    }
 
-    private:
-        void printSectionHeader( std::ostream& os ) {
-            assert( !m_sectionStack.empty() );
+    SourceLineInfo lineInfo = m_sectionStack.front().lineInfo;
 
-            if( m_sectionStack.size() > 1 ) {
-                os << getLineOfChars<'-'>() << "\n";
+    if (!lineInfo.empty()) os << lineInfo << "\n";
+    os << getLineOfChars<'.'>() << "\n\n";
+  }
 
-                std::vector<SectionInfo>::const_iterator
-                it = m_sectionStack.begin()+1, // Skip first section (test case)
-                itEnd = m_sectionStack.end();
-                for( ; it != itEnd; ++it )
-                    printHeaderString( os, it->name );
-                os << getLineOfChars<'-'>() << "\n";
-            }
+  // if string has a : in first line will set indent to follow it on
+  // subsequent lines
+  void printHeaderString(std::ostream &os, std::string const &_string,
+                         std::size_t indent = 0) {
+    std::size_t i = _string.find(": ");
+    if (i != std::string::npos)
+      i += 2;
+    else
+      i = 0;
+    os << Text(_string,
+               TextAttributes().setIndent(indent + i).setInitialIndent(indent))
+       << "\n";
+  }
 
-            SourceLineInfo lineInfo = m_sectionStack.front().lineInfo;
-
-            if( !lineInfo.empty() )
-                os << lineInfo << "\n";
-            os << getLineOfChars<'.'>() << "\n\n";
-        }
-
-        // if string has a : in first line will set indent to follow it on
-        // subsequent lines
-        void printHeaderString( std::ostream& os, std::string const& _string, std::size_t indent = 0 ) {
-            std::size_t i = _string.find( ": " );
-            if( i != std::string::npos )
-                i+=2;
-            else
-                i = 0;
-            os << Text( _string, TextAttributes()
-                           .setIndent( indent+i)
-                           .setInitialIndent( indent ) ) << "\n";
-        }
-    private:
-        bool m_headerPrintedForThisSection;
-    };
+ private:
+  bool m_headerPrintedForThisSection;
+};
 
 #ifdef CATCH_IMPL
-    TeamCityReporter::~TeamCityReporter() {}
+TeamCityReporter::~TeamCityReporter() {}
 #endif
 
-    INTERNAL_CATCH_REGISTER_REPORTER( "teamcity", TeamCityReporter )
+INTERNAL_CATCH_REGISTER_REPORTER("teamcity", TeamCityReporter)
 
-} // end namespace Catch
+}  // end namespace Catch
 
 #ifdef __clang__
-#   pragma clang diagnostic pop
+#pragma clang diagnostic pop
 #endif
 
-#endif // TWOBLUECUBES_CATCH_REPORTER_TEAMCITY_HPP_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_REPORTER_TEAMCITY_HPP_INCLUDED

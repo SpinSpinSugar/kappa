@@ -12,56 +12,56 @@
 
 namespace Catch {
 
-    struct Colour {
-        enum Code {
-            None = 0,
+struct Colour {
+  enum Code {
+    None = 0,
 
-            White,
-            Red,
-            Green,
-            Blue,
-            Cyan,
-            Yellow,
-            Grey,
+    White,
+    Red,
+    Green,
+    Blue,
+    Cyan,
+    Yellow,
+    Grey,
 
-            Bright = 0x10,
+    Bright = 0x10,
 
-            BrightRed = Bright | Red,
-            BrightGreen = Bright | Green,
-            LightGrey = Bright | Grey,
-            BrightWhite = Bright | White,
+    BrightRed = Bright | Red,
+    BrightGreen = Bright | Green,
+    LightGrey = Bright | Grey,
+    BrightWhite = Bright | White,
 
-            // By intention
-            FileName = LightGrey,
-            Warning = Yellow,
-            ResultError = BrightRed,
-            ResultSuccess = BrightGreen,
-            ResultExpectedFailure = Warning,
+    // By intention
+    FileName = LightGrey,
+    Warning = Yellow,
+    ResultError = BrightRed,
+    ResultSuccess = BrightGreen,
+    ResultExpectedFailure = Warning,
 
-            Error = BrightRed,
-            Success = Green,
+    Error = BrightRed,
+    Success = Green,
 
-            OriginalExpression = Cyan,
-            ReconstructedExpression = Yellow,
+    OriginalExpression = Cyan,
+    ReconstructedExpression = Yellow,
 
-            SecondaryText = LightGrey,
-            Headers = White
-        };
+    SecondaryText = LightGrey,
+    Headers = White
+  };
 
-        // Use constructed object for RAII guard
-        Colour( Code _colourCode );
-        Colour( Colour const& other );
-        ~Colour();
+  // Use constructed object for RAII guard
+  Colour(Code _colourCode);
+  Colour(Colour const &other);
+  ~Colour();
 
-        // Use static method for one-shot changes
-        static void use( Code _colourCode );
+  // Use static method for one-shot changes
+  static void use(Code _colourCode);
 
-    private:
-        bool m_moved;
-    };
+ private:
+  bool m_moved;
+};
 
-    inline std::ostream& operator << ( std::ostream& os, Colour const& ) { return os; }
+inline std::ostream &operator<<(std::ostream &os, Colour const &) { return os; }
 
-} // end namespace Catch
+}  // end namespace Catch
 
-#endif // TWOBLUECUBES_CATCH_CONSOLE_COLOUR_HPP_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_CONSOLE_COLOUR_HPP_INCLUDED

@@ -3,10 +3,10 @@
    \brief Mixture creation by passing a string.
 */
 
-#include <iostream>
 #include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <string>
-#include <iomanip> 
 
 #ifdef WINDOWS
 #include <direct.h>
@@ -18,18 +18,17 @@
 
 #include "kappa.hpp"
 
-std::string GetCurrentWorkingDir( void ) {
+std::string GetCurrentWorkingDir(void) {
   char buff[FILENAME_MAX];
-  GetCurrentDir( buff, FILENAME_MAX );
+  GetCurrentDir(buff, FILENAME_MAX);
   std::string current_working_dir(buff);
   return current_working_dir;
 }
 
-int main(int argc, char** argv) {
-
+int main(int argc, char **argv) {
   std::string m_source = std::getenv("KAPPA_DATA_DIRECTORY");
   std::cout << "KAPPA_DATA_DIRECTORY is: " << m_source << '\n';
-  std::string particle_source    = m_source + "particles.yaml";
+  std::string particle_source = m_source + "particles.yaml";
   std::string interaction_source = m_source + "interaction.yaml";
   std::string output_dir = GetCurrentWorkingDir();
   std::cout << "Current directory is: " << output_dir << std::endl;
@@ -37,5 +36,4 @@ int main(int argc, char** argv) {
   kappa::Mixture N2N("N2, N", interaction_source, particle_source);
 
   std::cout << N2N.get_names();
-
 }

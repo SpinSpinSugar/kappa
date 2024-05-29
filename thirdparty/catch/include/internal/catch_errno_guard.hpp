@@ -9,17 +9,17 @@
 
 #include <cerrno>
 
-
 namespace Catch {
 
-    class ErrnoGuard {
-    public:
-        ErrnoGuard():m_oldErrno(errno){}
-        ~ErrnoGuard() { errno = m_oldErrno; }
-    private:
-        int m_oldErrno;
-    };
+class ErrnoGuard {
+ public:
+  ErrnoGuard() : m_oldErrno(errno) {}
+  ~ErrnoGuard() { errno = m_oldErrno; }
 
-}
+ private:
+  int m_oldErrno;
+};
 
-#endif // TWOBLUECUBES_CATCH_ERRNO_GUARD_HPP_INCLUDED
+}  // namespace Catch
+
+#endif  // TWOBLUECUBES_CATCH_ERRNO_GUARD_HPP_INCLUDED

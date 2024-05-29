@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include <vector>
+
 #include "constants.h"
 #include "particle.hpp"
 
@@ -18,18 +19,14 @@
 namespace kappa {
 
 class Atom : public Particle {
-
  public:
-
   //! Creates an Atom-type object by loading the atom data from the database
   //! @param name atom's name
   //! @param filename path to the database file
   Atom(const std::string &name, const std::string &filename = "particles.yaml");
 
  private:
-        
   void readData(const std::string &name, const std::string &filename);
-
 };
-}
-#endif 
+}  // namespace kappa
+#endif

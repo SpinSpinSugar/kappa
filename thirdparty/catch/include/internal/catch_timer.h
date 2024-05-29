@@ -13,29 +13,28 @@
 #ifdef _MSC_VER
 
 namespace Catch {
-    typedef unsigned long long UInt64;
+typedef unsigned long long UInt64;
 }
 #else
 #include <stdint.h>
 namespace Catch {
-    typedef uint64_t UInt64;
+typedef uint64_t UInt64;
 }
 #endif
 
-
 namespace Catch {
-    class Timer {
-    public:
-        Timer() : m_ticks( 0 ) {}
-        void start();
-        unsigned int getElapsedMicroseconds() const;
-        unsigned int getElapsedMilliseconds() const;
-        double getElapsedSeconds() const;
+class Timer {
+ public:
+  Timer() : m_ticks(0) {}
+  void start();
+  unsigned int getElapsedMicroseconds() const;
+  unsigned int getElapsedMilliseconds() const;
+  double getElapsedSeconds() const;
 
-    private:
-        UInt64 m_ticks;
-    };
+ private:
+  UInt64 m_ticks;
+};
 
-} // namespace Catch
+}  // namespace Catch
 
-#endif // TWOBLUECUBES_CATCH_TIMER_H_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_TIMER_H_INCLUDED

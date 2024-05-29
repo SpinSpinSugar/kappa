@@ -3,7 +3,9 @@ cmake_minimum_required(VERSION 2.8)
 add_sources(kappa++
 	approximation.cpp
 	approximation_multit.cpp
-	approximation_onet.cpp)
+	approximation_onet.cpp
+    wrapper.hpp
+    )
 
 install(FILES approximation.hpp 	    DESTINATION include/kappa++)
 install(FILES approximation_multit.hpp 	DESTINATION include/kappa++)
@@ -13,3 +15,4 @@ install(FILES exceptions.hpp 		    DESTINATION include/kappa++)
 install(FILES kappa.hpp 		        DESTINATION include/kappa++)
 install(FILES logging.hpp 		        DESTINATION include/kappa++)
 install(FILES models.h 			        DESTINATION include/kappa++)
+install(FILES wrapper.hpp		        DESTINATION include/kappa++)

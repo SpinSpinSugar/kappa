@@ -26,6 +26,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
  add_subdirectory(mixtures)
  add_subdirectory(numerics)
  add_subdirectory(particles)
+ # add_subdirectory(wrappers)
 
  get_property(kappa++_SRCS GLOBAL PROPERTY kappa++_SRCS)
  add_library(kappa++ SHARED ${kappa++_SRCS})

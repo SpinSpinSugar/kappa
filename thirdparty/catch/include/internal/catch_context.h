@@ -11,40 +11,38 @@
 #include "catch_interfaces_generators.h"
 #include "catch_ptr.hpp"
 
-
 namespace Catch {
 
-    class TestCase;
-    class Stream;
-    struct IResultCapture;
-    struct IRunner;
-    struct IGeneratorsForTest;
-    struct IConfig;
+class TestCase;
+class Stream;
+struct IResultCapture;
+struct IRunner;
+struct IGeneratorsForTest;
+struct IConfig;
 
-    struct IContext
-    {
-        virtual ~IContext();
+struct IContext {
+  virtual ~IContext();
 
-        virtual IResultCapture* getResultCapture() = 0;
-        virtual IRunner* getRunner() = 0;
-        virtual size_t getGeneratorIndex( std::string const& fileInfo, size_t totalSize ) = 0;
-        virtual bool advanceGeneratorsForCurrentTest() = 0;
-        virtual Ptr<IConfig const> getConfig() const = 0;
-    };
+  virtual IResultCapture *getResultCapture() = 0;
+  virtual IRunner *getRunner() = 0;
+  virtual size_t getGeneratorIndex(std::string const &fileInfo,
+                                   size_t totalSize) = 0;
+  virtual bool advanceGeneratorsForCurrentTest() = 0;
+  virtual Ptr<IConfig const> getConfig() const = 0;
+};
 
-    struct IMutableContext : IContext
-    {
-        virtual ~IMutableContext();
-        virtual void setResultCapture( IResultCapture* resultCapture ) = 0;
-        virtual void setRunner( IRunner* runner ) = 0;
-        virtual void setConfig( Ptr<IConfig const> const& config ) = 0;
-    };
+struct IMutableContext : IContext {
+  virtual ~IMutableContext();
+  virtual void setResultCapture(IResultCapture *resultCapture) = 0;
+  virtual void setRunner(IRunner *runner) = 0;
+  virtual void setConfig(Ptr<IConfig const> const &config) = 0;
+};
 
-    IContext& getCurrentContext();
-    IMutableContext& getCurrentMutableContext();
-    void cleanUpContext();
-    Stream createStream( std::string const& streamName );
+IContext &getCurrentContext();
+IMutableContext &getCurrentMutableContext();
+void cleanUpContext();
+Stream createStream(std::string const &streamName);
 
-}
+}  // namespace Catch
 
-#endif // TWOBLUECUBES_CATCH_CONTEXT_H_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_CONTEXT_H_INCLUDED

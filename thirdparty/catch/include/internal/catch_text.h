@@ -17,8 +17,8 @@
 #undef CLICHE_TBC_TEXT_FORMAT_OUTER_NAMESPACE
 
 namespace Catch {
-    using Tbc::Text;
-    using Tbc::TextAttributes;
-}
+using Tbc::Text;
+using Tbc::TextAttributes;
+}  // namespace Catch
 
-#endif // TWOBLUECUBES_CATCH_TEXT_H_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_TEXT_H_INCLUDED

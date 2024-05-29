@@ -10,29 +10,27 @@
 
 namespace Catch {
 
-    // Versioning information
-    struct Version {
-        Version(    unsigned int _majorVersion,
-                    unsigned int _minorVersion,
-                    unsigned int _patchNumber,
-                    char const * const _branchName,
-                    unsigned int _buildNumber );
+// Versioning information
+struct Version {
+  Version(unsigned int _majorVersion, unsigned int _minorVersion,
+          unsigned int _patchNumber, char const *const _branchName,
+          unsigned int _buildNumber);
 
-        unsigned int const majorVersion;
-        unsigned int const minorVersion;
-        unsigned int const patchNumber;
+  unsigned int const majorVersion;
+  unsigned int const minorVersion;
+  unsigned int const patchNumber;
 
-        // buildNumber is only used if branchName is not null
-        char const * const branchName;
-        unsigned int const buildNumber;
+  // buildNumber is only used if branchName is not null
+  char const *const branchName;
+  unsigned int const buildNumber;
 
-        friend std::ostream& operator << ( std::ostream& os, Version const& version );
+  friend std::ostream &operator<<(std::ostream &os, Version const &version);
 
-    private:
-        void operator=( Version const& );
-    };
+ private:
+  void operator=(Version const &);
+};
 
-    inline Version libraryVersion();
-}
+inline Version libraryVersion();
+}  // namespace Catch
 
-#endif // TWOBLUECUBES_CATCH_VERSION_H_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_VERSION_H_INCLUDED

@@ -8,23 +8,25 @@
 #ifndef TWOBLUECUBES_CATCH_TAG_ALIAS_REGISTRY_H_INCLUDED
 #define TWOBLUECUBES_CATCH_TAG_ALIAS_REGISTRY_H_INCLUDED
 
-#include "catch_interfaces_tag_alias_registry.h"
-
 #include <map>
+
+#include "catch_interfaces_tag_alias_registry.h"
 
 namespace Catch {
 
-    class TagAliasRegistry : public ITagAliasRegistry {
-    public:
-        virtual ~TagAliasRegistry();
-        virtual Option<TagAlias> find( std::string const& alias ) const;
-        virtual std::string expandAliases( std::string const& unexpandedTestSpec ) const;
-        void add( std::string const& alias, std::string const& tag, SourceLineInfo const& lineInfo );
+class TagAliasRegistry : public ITagAliasRegistry {
+ public:
+  virtual ~TagAliasRegistry();
+  virtual Option<TagAlias> find(std::string const &alias) const;
+  virtual std::string expandAliases(
+      std::string const &unexpandedTestSpec) const;
+  void add(std::string const &alias, std::string const &tag,
+           SourceLineInfo const &lineInfo);
 
-    private:
-        std::map<std::string, TagAlias> m_registry;
-    };
+ private:
+  std::map<std::string, TagAlias> m_registry;
+};
 
-} // end namespace Catch
+}  // end namespace Catch
 
-#endif // TWOBLUECUBES_CATCH_TAG_ALIAS_REGISTRY_H_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_TAG_ALIAS_REGISTRY_H_INCLUDED
