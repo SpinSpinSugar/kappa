@@ -10,137 +10,138 @@
 
 #include "catch_compiler_capabilities.h"
 
-#define INTERNAL_CATCH_UNIQUE_NAME_LINE2( name, line ) name##line
-#define INTERNAL_CATCH_UNIQUE_NAME_LINE( name, line ) INTERNAL_CATCH_UNIQUE_NAME_LINE2( name, line )
+#define INTERNAL_CATCH_UNIQUE_NAME_LINE2(name, line) name##line
+#define INTERNAL_CATCH_UNIQUE_NAME_LINE(name, line) \
+  INTERNAL_CATCH_UNIQUE_NAME_LINE2(name, line)
 #ifdef CATCH_CONFIG_COUNTER
-#  define INTERNAL_CATCH_UNIQUE_NAME( name ) INTERNAL_CATCH_UNIQUE_NAME_LINE( name, __COUNTER__ )
+#define INTERNAL_CATCH_UNIQUE_NAME(name) \
+  INTERNAL_CATCH_UNIQUE_NAME_LINE(name, __COUNTER__)
 #else
-#  define INTERNAL_CATCH_UNIQUE_NAME( name ) INTERNAL_CATCH_UNIQUE_NAME_LINE( name, __LINE__ )
+#define INTERNAL_CATCH_UNIQUE_NAME(name) \
+  INTERNAL_CATCH_UNIQUE_NAME_LINE(name, __LINE__)
 #endif
 
-#define INTERNAL_CATCH_STRINGIFY2( expr ) #expr
-#define INTERNAL_CATCH_STRINGIFY( expr ) INTERNAL_CATCH_STRINGIFY2( expr )
+#define INTERNAL_CATCH_STRINGIFY2(expr) #expr
+#define INTERNAL_CATCH_STRINGIFY(expr) INTERNAL_CATCH_STRINGIFY2(expr)
 
-#include <sstream>
 #include <algorithm>
+#include <sstream>
 
 namespace Catch {
 
-    struct IConfig;
+struct IConfig;
 
-    struct CaseSensitive { enum Choice {
-        Yes,
-        No
-    }; };
+struct CaseSensitive {
+  enum Choice { Yes, No };
+};
 
-    class NonCopyable {
+class NonCopyable {
 #ifdef CATCH_CONFIG_CPP11_GENERATED_METHODS
-        NonCopyable( NonCopyable const& )              = delete;
-        NonCopyable( NonCopyable && )                  = delete;
-        NonCopyable& operator = ( NonCopyable const& ) = delete;
-        NonCopyable& operator = ( NonCopyable && )     = delete;
+  NonCopyable(NonCopyable const &) = delete;
+  NonCopyable(NonCopyable &&) = delete;
+  NonCopyable &operator=(NonCopyable const &) = delete;
+  NonCopyable &operator=(NonCopyable &&) = delete;
 #else
-        NonCopyable( NonCopyable const& info );
-        NonCopyable& operator = ( NonCopyable const& );
+  NonCopyable(NonCopyable const &info);
+  NonCopyable &operator=(NonCopyable const &);
 #endif
 
-    protected:
-        NonCopyable() {}
-        virtual ~NonCopyable();
-    };
+ protected:
+  NonCopyable() {}
+  virtual ~NonCopyable();
+};
 
-    class SafeBool {
-    public:
-        typedef void (SafeBool::*type)() const;
+class SafeBool {
+ public:
+  typedef void (SafeBool::*type)() const;
 
-        static type makeSafe( bool value ) {
-            return value ? &SafeBool::trueValue : 0;
-        }
-    private:
-        void trueValue() const {}
-    };
+  static type makeSafe(bool value) { return value ? &SafeBool::trueValue : 0; }
 
-    template<typename ContainerT>
-    inline void deleteAll( ContainerT& container ) {
-        typename ContainerT::const_iterator it = container.begin();
-        typename ContainerT::const_iterator itEnd = container.end();
-        for(; it != itEnd; ++it )
-            delete *it;
-    }
-    template<typename AssociativeContainerT>
-    inline void deleteAllValues( AssociativeContainerT& container ) {
-        typename AssociativeContainerT::const_iterator it = container.begin();
-        typename AssociativeContainerT::const_iterator itEnd = container.end();
-        for(; it != itEnd; ++it )
-            delete it->second;
-    }
+ private:
+  void trueValue() const {}
+};
 
-    bool startsWith( std::string const& s, std::string const& prefix );
-    bool startsWith( std::string const& s, char prefix );
-    bool endsWith( std::string const& s, std::string const& suffix );
-    bool endsWith( std::string const& s, char suffix );
-    bool contains( std::string const& s, std::string const& infix );
-    void toLowerInPlace( std::string& s );
-    std::string toLower( std::string const& s );
-    std::string trim( std::string const& str );
-    bool replaceInPlace( std::string& str, std::string const& replaceThis, std::string const& withThis );
-
-    struct pluralise {
-        pluralise( std::size_t count, std::string const& label );
-
-        friend std::ostream& operator << ( std::ostream& os, pluralise const& pluraliser );
-
-        std::size_t m_count;
-        std::string m_label;
-    };
-
-    struct SourceLineInfo {
-
-        SourceLineInfo();
-        SourceLineInfo( char const* _file, std::size_t _line );
-#  ifdef CATCH_CONFIG_CPP11_GENERATED_METHODS
-        SourceLineInfo(SourceLineInfo const& other)          = default;
-        SourceLineInfo( SourceLineInfo && )                  = default;
-        SourceLineInfo& operator = ( SourceLineInfo const& ) = default;
-        SourceLineInfo& operator = ( SourceLineInfo && )     = default;
-#  endif
-        bool empty() const;
-        bool operator == ( SourceLineInfo const& other ) const;
-        bool operator < ( SourceLineInfo const& other ) const;
-
-        char const* file;
-        std::size_t line;
-    };
-
-    std::ostream& operator << ( std::ostream& os, SourceLineInfo const& info );
-
-    // This is just here to avoid compiler warnings with macro constants and boolean literals
-    inline bool isTrue( bool value ){ return value; }
-    inline bool alwaysTrue() { return true; }
-    inline bool alwaysFalse() { return false; }
-
-    void throwLogicError( std::string const& message, SourceLineInfo const& locationInfo );
-
-    void seedRng( IConfig const& config );
-    unsigned int rngSeed();
-
-    // Use this in variadic streaming macros to allow
-    //    >> +StreamEndStop
-    // as well as
-    //    >> stuff +StreamEndStop
-    struct StreamEndStop {
-        std::string operator+() {
-            return std::string();
-        }
-    };
-    template<typename T>
-    T const& operator + ( T const& value, StreamEndStop ) {
-        return value;
-    }
+template <typename ContainerT>
+inline void deleteAll(ContainerT &container) {
+  typename ContainerT::const_iterator it = container.begin();
+  typename ContainerT::const_iterator itEnd = container.end();
+  for (; it != itEnd; ++it) delete *it;
+}
+template <typename AssociativeContainerT>
+inline void deleteAllValues(AssociativeContainerT &container) {
+  typename AssociativeContainerT::const_iterator it = container.begin();
+  typename AssociativeContainerT::const_iterator itEnd = container.end();
+  for (; it != itEnd; ++it) delete it->second;
 }
 
-#define CATCH_INTERNAL_LINEINFO ::Catch::SourceLineInfo( __FILE__, static_cast<std::size_t>( __LINE__ ) )
-#define CATCH_INTERNAL_ERROR( msg ) ::Catch::throwLogicError( msg, CATCH_INTERNAL_LINEINFO );
+bool startsWith(std::string const &s, std::string const &prefix);
+bool startsWith(std::string const &s, char prefix);
+bool endsWith(std::string const &s, std::string const &suffix);
+bool endsWith(std::string const &s, char suffix);
+bool contains(std::string const &s, std::string const &infix);
+void toLowerInPlace(std::string &s);
+std::string toLower(std::string const &s);
+std::string trim(std::string const &str);
+bool replaceInPlace(std::string &str, std::string const &replaceThis,
+                    std::string const &withThis);
 
-#endif // TWOBLUECUBES_CATCH_COMMON_H_INCLUDED
+struct pluralise {
+  pluralise(std::size_t count, std::string const &label);
 
+  friend std::ostream &operator<<(std::ostream &os,
+                                  pluralise const &pluraliser);
+
+  std::size_t m_count;
+  std::string m_label;
+};
+
+struct SourceLineInfo {
+  SourceLineInfo();
+  SourceLineInfo(char const *_file, std::size_t _line);
+#ifdef CATCH_CONFIG_CPP11_GENERATED_METHODS
+  SourceLineInfo(SourceLineInfo const &other) = default;
+  SourceLineInfo(SourceLineInfo &&) = default;
+  SourceLineInfo &operator=(SourceLineInfo const &) = default;
+  SourceLineInfo &operator=(SourceLineInfo &&) = default;
+#endif
+  bool empty() const;
+  bool operator==(SourceLineInfo const &other) const;
+  bool operator<(SourceLineInfo const &other) const;
+
+  char const *file;
+  std::size_t line;
+};
+
+std::ostream &operator<<(std::ostream &os, SourceLineInfo const &info);
+
+// This is just here to avoid compiler warnings with macro constants and boolean
+// literals
+inline bool isTrue(bool value) { return value; }
+inline bool alwaysTrue() { return true; }
+inline bool alwaysFalse() { return false; }
+
+void throwLogicError(std::string const &message,
+                     SourceLineInfo const &locationInfo);
+
+void seedRng(IConfig const &config);
+unsigned int rngSeed();
+
+// Use this in variadic streaming macros to allow
+//    >> +StreamEndStop
+// as well as
+//    >> stuff +StreamEndStop
+struct StreamEndStop {
+  std::string operator+() { return std::string(); }
+};
+template <typename T>
+T const &operator+(T const &value, StreamEndStop) {
+  return value;
+}
+}  // namespace Catch
+
+#define CATCH_INTERNAL_LINEINFO \
+  ::Catch::SourceLineInfo(__FILE__, static_cast<std::size_t>(__LINE__))
+#define CATCH_INTERNAL_ERROR(msg) \
+  ::Catch::throwLogicError(msg, CATCH_INTERNAL_LINEINFO);
+
+#endif  // TWOBLUECUBES_CATCH_COMMON_H_INCLUDED

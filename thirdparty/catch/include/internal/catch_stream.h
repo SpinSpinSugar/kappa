@@ -9,56 +9,57 @@
 #ifndef TWOBLUECUBES_CATCH_STREAM_H_INCLUDED
 #define TWOBLUECUBES_CATCH_STREAM_H_INCLUDED
 
+#include <fstream>
+#include <memory>
+#include <ostream>
+#include <streambuf>
+
 #include "catch_compiler_capabilities.h"
 #include "catch_streambuf.h"
 
-#include <streambuf>
-#include <ostream>
-#include <fstream>
-#include <memory>
-
 namespace Catch {
 
-    std::ostream& cout();
-    std::ostream& cerr();
+std::ostream &cout();
+std::ostream &cerr();
 
+struct IStream {
+  virtual ~IStream() CATCH_NOEXCEPT;
+  virtual std::ostream &stream() const = 0;
+};
 
-    struct IStream {
-        virtual ~IStream() CATCH_NOEXCEPT;
-        virtual std::ostream& stream() const = 0;
-    };
+class FileStream : public IStream {
+  mutable std::ofstream m_ofs;
 
-    class FileStream : public IStream {
-        mutable std::ofstream m_ofs;
-    public:
-        FileStream( std::string const& filename );
-        virtual ~FileStream() CATCH_NOEXCEPT;
-    public: // IStream
-        virtual std::ostream& stream() const CATCH_OVERRIDE;
-    };
+ public:
+  FileStream(std::string const &filename);
+  virtual ~FileStream() CATCH_NOEXCEPT;
 
+ public:  // IStream
+  virtual std::ostream &stream() const CATCH_OVERRIDE;
+};
 
-    class CoutStream : public IStream {
-        mutable std::ostream m_os;
-    public:
-        CoutStream();
-        virtual ~CoutStream() CATCH_NOEXCEPT;
+class CoutStream : public IStream {
+  mutable std::ostream m_os;
 
-    public: // IStream
-        virtual std::ostream& stream() const CATCH_OVERRIDE;
-    };
+ public:
+  CoutStream();
+  virtual ~CoutStream() CATCH_NOEXCEPT;
 
+ public:  // IStream
+  virtual std::ostream &stream() const CATCH_OVERRIDE;
+};
 
-    class DebugOutStream : public IStream {
-        CATCH_AUTO_PTR( StreamBufBase ) m_streamBuf;
-        mutable std::ostream m_os;
-    public:
-        DebugOutStream();
-        virtual ~DebugOutStream() CATCH_NOEXCEPT;
+class DebugOutStream : public IStream {
+  CATCH_AUTO_PTR(StreamBufBase) m_streamBuf;
+  mutable std::ostream m_os;
 
-    public: // IStream
-        virtual std::ostream& stream() const CATCH_OVERRIDE;
-    };
-}
+ public:
+  DebugOutStream();
+  virtual ~DebugOutStream() CATCH_NOEXCEPT;
 
-#endif // TWOBLUECUBES_CATCH_STREAM_H_INCLUDED
+ public:  // IStream
+  virtual std::ostream &stream() const CATCH_OVERRIDE;
+};
+}  // namespace Catch
+
+#endif  // TWOBLUECUBES_CATCH_STREAM_H_INCLUDED

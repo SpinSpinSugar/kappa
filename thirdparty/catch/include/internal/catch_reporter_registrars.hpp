@@ -13,90 +13,90 @@
 
 namespace Catch {
 
-    template<typename T>
-    class LegacyReporterRegistrar {
+template <typename T>
+class LegacyReporterRegistrar {
+  class ReporterFactory : public IReporterFactory {
+    virtual IStreamingReporter *create(ReporterConfig const &config) const {
+      return new LegacyReporterAdapter(new T(config));
+    }
 
-        class ReporterFactory : public IReporterFactory {
-            virtual IStreamingReporter* create( ReporterConfig const& config ) const {
-                return new LegacyReporterAdapter( new T( config ) );
-            }
+    virtual std::string getDescription() const { return T::getDescription(); }
+  };
 
-            virtual std::string getDescription() const {
-                return T::getDescription();
-            }
-        };
+ public:
+  LegacyReporterRegistrar(std::string const &name) {
+    getMutableRegistryHub().registerReporter(name, new ReporterFactory());
+  }
+};
 
-    public:
+template <typename T>
+class ReporterRegistrar {
+  class ReporterFactory : public SharedImpl<IReporterFactory> {
+    // *** Please Note ***:
+    // - If you end up here looking at a compiler error because it's trying to
+    // register your custom reporter class be aware that the native reporter
+    // interface has changed to IStreamingReporter. The "legacy" interface,
+    // IReporter, is still supported via an adapter. Just use
+    // REGISTER_LEGACY_REPORTER to take advantage of the adapter. However please
+    // consider updating to the new interface as the old one is now deprecated
+    // and will probably be removed quite soon! Please contact me via github if
+    // you have any questions at all about this. In fact, ideally, please
+    // contact me anyway to let me know you've hit this - as I have no idea who
+    // is actually using custom reporters at all (possibly no-one!). The new
+    // interface is designed to minimise exposure to interface changes in the
+    // future.
+    virtual IStreamingReporter *create(ReporterConfig const &config) const {
+      return new T(config);
+    }
 
-        LegacyReporterRegistrar( std::string const& name ) {
-            getMutableRegistryHub().registerReporter( name, new ReporterFactory() );
-        }
-    };
+    virtual std::string getDescription() const { return T::getDescription(); }
+  };
 
-    template<typename T>
-    class ReporterRegistrar {
+ public:
+  ReporterRegistrar(std::string const &name) {
+    getMutableRegistryHub().registerReporter(name, new ReporterFactory());
+  }
+};
 
-        class ReporterFactory : public SharedImpl<IReporterFactory> {
+template <typename T>
+class ListenerRegistrar {
+  class ListenerFactory : public SharedImpl<IReporterFactory> {
+    virtual IStreamingReporter *create(ReporterConfig const &config) const {
+      return new T(config);
+    }
+    virtual std::string getDescription() const { return std::string(); }
+  };
 
-            // *** Please Note ***:
-            // - If you end up here looking at a compiler error because it's trying to register
-            // your custom reporter class be aware that the native reporter interface has changed
-            // to IStreamingReporter. The "legacy" interface, IReporter, is still supported via
-            // an adapter. Just use REGISTER_LEGACY_REPORTER to take advantage of the adapter.
-            // However please consider updating to the new interface as the old one is now
-            // deprecated and will probably be removed quite soon!
-            // Please contact me via github if you have any questions at all about this.
-            // In fact, ideally, please contact me anyway to let me know you've hit this - as I have
-            // no idea who is actually using custom reporters at all (possibly no-one!).
-            // The new interface is designed to minimise exposure to interface changes in the future.
-            virtual IStreamingReporter* create( ReporterConfig const& config ) const {
-                return new T( config );
-            }
+ public:
+  ListenerRegistrar() {
+    getMutableRegistryHub().registerListener(new ListenerFactory());
+  }
+};
+}  // namespace Catch
 
-            virtual std::string getDescription() const {
-                return T::getDescription();
-            }
-        };
+#define INTERNAL_CATCH_REGISTER_LEGACY_REPORTER(name, reporterType) \
+  namespace {                                                       \
+  Catch::LegacyReporterRegistrar<reporterType>                      \
+      catch_internal_RegistrarFor##reporterType(name);              \
+  }
 
-    public:
-
-        ReporterRegistrar( std::string const& name ) {
-            getMutableRegistryHub().registerReporter( name, new ReporterFactory() );
-        }
-    };
-
-    template<typename T>
-    class ListenerRegistrar {
-
-        class ListenerFactory : public SharedImpl<IReporterFactory> {
-
-            virtual IStreamingReporter* create( ReporterConfig const& config ) const {
-                return new T( config );
-            }
-            virtual std::string getDescription() const {
-                return std::string();
-            }
-        };
-
-    public:
-
-        ListenerRegistrar() {
-            getMutableRegistryHub().registerListener( new ListenerFactory() );
-        }
-    };
-}
-
-#define INTERNAL_CATCH_REGISTER_LEGACY_REPORTER( name, reporterType ) \
-    namespace{ Catch::LegacyReporterRegistrar<reporterType> catch_internal_RegistrarFor##reporterType( name ); }
-
-#define INTERNAL_CATCH_REGISTER_REPORTER( name, reporterType ) \
-    namespace{ Catch::ReporterRegistrar<reporterType> catch_internal_RegistrarFor##reporterType( name ); }
+#define INTERNAL_CATCH_REGISTER_REPORTER(name, reporterType) \
+  namespace {                                                \
+  Catch::ReporterRegistrar<reporterType>                     \
+      catch_internal_RegistrarFor##reporterType(name);       \
+  }
 
 // Deprecated - use the form without INTERNAL_
-#define INTERNAL_CATCH_REGISTER_LISTENER( listenerType ) \
-    namespace{ Catch::ListenerRegistrar<listenerType> catch_internal_RegistrarFor##listenerType; }
+#define INTERNAL_CATCH_REGISTER_LISTENER(listenerType) \
+  namespace {                                          \
+  Catch::ListenerRegistrar<listenerType>               \
+      catch_internal_RegistrarFor##listenerType;       \
+  }
 
-#define CATCH_REGISTER_LISTENER( listenerType ) \
-    namespace{ Catch::ListenerRegistrar<listenerType> catch_internal_RegistrarFor##listenerType; }
+#define CATCH_REGISTER_LISTENER(listenerType)    \
+  namespace {                                    \
+  Catch::ListenerRegistrar<listenerType>         \
+      catch_internal_RegistrarFor##listenerType; \
+  }
 
-#endif // TWOBLUECUBES_CATCH_REPORTER_REGISTRARS_HPP_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_REPORTER_REGISTRARS_HPP_INCLUDED

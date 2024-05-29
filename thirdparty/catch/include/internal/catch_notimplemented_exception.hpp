@@ -8,23 +8,24 @@
 #ifndef TWOBLUECUBES_CATCH_NOTIMPLEMENTED_EXCEPTION_HPP_INCLUDED
 #define TWOBLUECUBES_CATCH_NOTIMPLEMENTED_EXCEPTION_HPP_INCLUDED
 
-#include "catch_notimplemented_exception.h"
 #include <sstream>
+
+#include "catch_notimplemented_exception.h"
 
 namespace Catch {
 
-    NotImplementedException::NotImplementedException( SourceLineInfo const& lineInfo )
-    :   m_lineInfo( lineInfo ) {
-        std::ostringstream oss;
-        oss << lineInfo << ": function ";
-        oss << "not implemented";
-        m_what = oss.str();
-    }
+NotImplementedException::NotImplementedException(SourceLineInfo const &lineInfo)
+    : m_lineInfo(lineInfo) {
+  std::ostringstream oss;
+  oss << lineInfo << ": function ";
+  oss << "not implemented";
+  m_what = oss.str();
+}
 
-    const char* NotImplementedException::what() const CATCH_NOEXCEPT {
-        return m_what.c_str();
-    }
+const char *NotImplementedException::what() const CATCH_NOEXCEPT {
+  return m_what.c_str();
+}
 
-} // end namespace Catch
+}  // end namespace Catch
 
-#endif // TWOBLUECUBES_CATCH_NOTIMPLEMENTED_EXCEPTION_HPP_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_NOTIMPLEMENTED_EXCEPTION_HPP_INCLUDED

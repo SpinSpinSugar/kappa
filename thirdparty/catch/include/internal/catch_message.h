@@ -9,58 +9,57 @@
 #define TWOBLUECUBES_CATCH_MESSAGE_H_INCLUDED
 
 #include <string>
-#include "catch_result_type.h"
+
 #include "catch_common.h"
+#include "catch_result_type.h"
 
 namespace Catch {
 
-    struct MessageInfo {
-        MessageInfo(    std::string const& _macroName,
-                        SourceLineInfo const& _lineInfo,
-                        ResultWas::OfType _type );
+struct MessageInfo {
+  MessageInfo(std::string const &_macroName, SourceLineInfo const &_lineInfo,
+              ResultWas::OfType _type);
 
-        std::string macroName;
-        SourceLineInfo lineInfo;
-        ResultWas::OfType type;
-        std::string message;
-        unsigned int sequence;
+  std::string macroName;
+  SourceLineInfo lineInfo;
+  ResultWas::OfType type;
+  std::string message;
+  unsigned int sequence;
 
-        bool operator == ( MessageInfo const& other ) const {
-            return sequence == other.sequence;
-        }
-        bool operator < ( MessageInfo const& other ) const {
-            return sequence < other.sequence;
-        }
-    private:
-        static unsigned int globalCount;
-    };
+  bool operator==(MessageInfo const &other) const {
+    return sequence == other.sequence;
+  }
+  bool operator<(MessageInfo const &other) const {
+    return sequence < other.sequence;
+  }
 
-    struct MessageBuilder {
-        MessageBuilder( std::string const& macroName,
-                        SourceLineInfo const& lineInfo,
-                        ResultWas::OfType type )
-        : m_info( macroName, lineInfo, type )
-        {}
+ private:
+  static unsigned int globalCount;
+};
 
-        template<typename T>
-        MessageBuilder& operator << ( T const& value ) {
-            m_stream << value;
-            return *this;
-        }
+struct MessageBuilder {
+  MessageBuilder(std::string const &macroName, SourceLineInfo const &lineInfo,
+                 ResultWas::OfType type)
+      : m_info(macroName, lineInfo, type) {}
 
-        MessageInfo m_info;
-        std::ostringstream m_stream;
-    };
+  template <typename T>
+  MessageBuilder &operator<<(T const &value) {
+    m_stream << value;
+    return *this;
+  }
 
-    class ScopedMessage {
-    public:
-        ScopedMessage( MessageBuilder const& builder );
-        ScopedMessage( ScopedMessage const& other );
-        ~ScopedMessage();
+  MessageInfo m_info;
+  std::ostringstream m_stream;
+};
 
-        MessageInfo m_info;
-    };
+class ScopedMessage {
+ public:
+  ScopedMessage(MessageBuilder const &builder);
+  ScopedMessage(ScopedMessage const &other);
+  ~ScopedMessage();
 
-} // end namespace Catch
+  MessageInfo m_info;
+};
 
-#endif // TWOBLUECUBES_CATCH_MESSAGE_H_INCLUDED
+}  // end namespace Catch
+
+#endif  // TWOBLUECUBES_CATCH_MESSAGE_H_INCLUDED

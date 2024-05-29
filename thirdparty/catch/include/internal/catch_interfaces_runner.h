@@ -9,12 +9,12 @@
 #define TWOBLUECUBES_CATCH_INTERFACES_RUNNER_H_INCLUDED
 
 namespace Catch {
-    class TestCase;
+class TestCase;
 
-    struct IRunner {
-        virtual ~IRunner();
-        virtual bool aborting() const = 0;
-    };
-}
+struct IRunner {
+  virtual ~IRunner();
+  virtual bool aborting() const = 0;
+};
+}  // namespace Catch
 
-#endif // TWOBLUECUBES_CATCH_INTERFACES_RUNNER_H_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_INTERFACES_RUNNER_H_INCLUDED

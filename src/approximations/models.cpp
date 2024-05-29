@@ -4,4 +4,4 @@
 
 #include "models.h"
 
-namespace kappa {} 
+namespace kappa {}

@@ -1,4 +1,4 @@
-/*! 
+/*!
     \file approximations.hpp
  */
 

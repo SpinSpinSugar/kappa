@@ -10,22 +10,12 @@
 
 #ifdef CATCH_CONFIG_VARIADIC_MACROS
 
-TEST_CASE()
-{
-    SUCCEED( "anonymous test case" );
-}
+TEST_CASE() { SUCCEED("anonymous test case"); }
 
-TEST_CASE( "Test case with one argument" )
-{
-    SUCCEED( "no assertions" );
-}
+TEST_CASE("Test case with one argument") { SUCCEED("no assertions"); }
 
-TEST_CASE( "Variadic macros", "[variadic][sections]" )
-{
-    SECTION( "Section with one argument" )
-    {
-        SUCCEED( "no assertions" );
-    }
+TEST_CASE("Variadic macros", "[variadic][sections]") {
+  SECTION("Section with one argument") { SUCCEED("no assertions"); }
 }
 
 #endif

@@ -8,43 +8,43 @@
 #ifndef TWOBLUECUBES_CATCH_REPORTER_REGISTRY_HPP_INCLUDED
 #define TWOBLUECUBES_CATCH_REPORTER_REGISTRY_HPP_INCLUDED
 
-#include "catch_interfaces_reporter.h"
-
 #include <map>
+
+#include "catch_interfaces_reporter.h"
 
 namespace Catch {
 
-    class ReporterRegistry : public IReporterRegistry {
+class ReporterRegistry : public IReporterRegistry {
+ public:
+  virtual ~ReporterRegistry() CATCH_OVERRIDE {}
 
-    public:
+  virtual IStreamingReporter *create(std::string const &name,
+                                     Ptr<IConfig const> const &config) const
+      CATCH_OVERRIDE {
+    FactoryMap::const_iterator it = m_factories.find(name);
+    if (it == m_factories.end()) return CATCH_NULL;
+    return it->second->create(ReporterConfig(config));
+  }
 
-        virtual ~ReporterRegistry() CATCH_OVERRIDE {}
+  void registerReporter(std::string const &name,
+                        Ptr<IReporterFactory> const &factory) {
+    m_factories.insert(std::make_pair(name, factory));
+  }
+  void registerListener(Ptr<IReporterFactory> const &factory) {
+    m_listeners.push_back(factory);
+  }
 
-        virtual IStreamingReporter* create( std::string const& name, Ptr<IConfig const> const& config ) const CATCH_OVERRIDE {
-            FactoryMap::const_iterator it =  m_factories.find( name );
-            if( it == m_factories.end() )
-                return CATCH_NULL;
-            return it->second->create( ReporterConfig( config ) );
-        }
+  virtual FactoryMap const &getFactories() const CATCH_OVERRIDE {
+    return m_factories;
+  }
+  virtual Listeners const &getListeners() const CATCH_OVERRIDE {
+    return m_listeners;
+  }
 
-        void registerReporter( std::string const& name, Ptr<IReporterFactory> const& factory ) {
-            m_factories.insert( std::make_pair( name, factory ) );
-        }
-        void registerListener( Ptr<IReporterFactory> const& factory ) {
-            m_listeners.push_back( factory );
-        }
+ private:
+  FactoryMap m_factories;
+  Listeners m_listeners;
+};
+}  // namespace Catch
 
-        virtual FactoryMap const& getFactories() const CATCH_OVERRIDE {
-            return m_factories;
-        }
-        virtual Listeners const& getListeners() const CATCH_OVERRIDE {
-            return m_listeners;
-        }
-
-    private:
-        FactoryMap m_factories;
-        Listeners m_listeners;
-    };
-}
-
-#endif // TWOBLUECUBES_CATCH_REPORTER_REGISTRY_HPP_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_REPORTER_REGISTRY_HPP_INCLUDED

@@ -11,37 +11,36 @@
 #include <type_traits>
 #endif
 
-
 namespace Catch {
 
 #if defined(CATCH_CONFIG_CPP11_TYPE_TRAITS)
 
-     template <typename T>
-     using add_lvalue_reference = std::add_lvalue_reference<T>;
+template <typename T>
+using add_lvalue_reference = std::add_lvalue_reference<T>;
 
-     template <typename T>
-     using add_const = std::add_const<T>;
+template <typename T>
+using add_const = std::add_const<T>;
 
 #else
 
-    template <typename T>
-    struct add_const { 
-        typedef const T type;
-    };
+template <typename T>
+struct add_const {
+  typedef const T type;
+};
 
-    template <typename T>
-    struct add_lvalue_reference {
-        typedef T& type;
-    };
-    template <typename T>
-    struct add_lvalue_reference<T&> {
-        typedef T& type;
-    };
-    // No && overload, because that is C++11, in which case we have
-    // proper type_traits implementation from the standard library
+template <typename T>
+struct add_lvalue_reference {
+  typedef T &type;
+};
+template <typename T>
+struct add_lvalue_reference<T &> {
+  typedef T &type;
+};
+// No && overload, because that is C++11, in which case we have
+// proper type_traits implementation from the standard library
 
 #endif
 
-}
+}  // namespace Catch
 
-#endif // TWOBLUECUBES_CATCH_TYPE_TRAITS_HPP_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_TYPE_TRAITS_HPP_INCLUDED

@@ -8,110 +8,112 @@
 #ifndef TWOBLUECUBES_CATCH_RESULT_BUILDER_H_INCLUDED
 #define TWOBLUECUBES_CATCH_RESULT_BUILDER_H_INCLUDED
 
-#include "catch_result_type.h"
 #include "catch_assertionresult.h"
 #include "catch_common.h"
 #include "catch_matchers.hpp"
+#include "catch_result_type.h"
 
 namespace Catch {
 
-    struct TestFailureException{};
+struct TestFailureException {};
 
-    template<typename T> class ExpressionLhs;
+template <typename T>
+class ExpressionLhs;
 
-    struct CopyableStream {
-        CopyableStream() {}
-        CopyableStream( CopyableStream const& other ) {
-            oss << other.oss.str();
-        }
-        CopyableStream& operator=( CopyableStream const& other ) {
-            oss.str(std::string());
-            oss << other.oss.str();
-            return *this;
-        }
-        std::ostringstream oss;
-    };
+struct CopyableStream {
+  CopyableStream() {}
+  CopyableStream(CopyableStream const &other) { oss << other.oss.str(); }
+  CopyableStream &operator=(CopyableStream const &other) {
+    oss.str(std::string());
+    oss << other.oss.str();
+    return *this;
+  }
+  std::ostringstream oss;
+};
 
-    class ResultBuilder : public DecomposedExpression {
-    public:
-        ResultBuilder(  char const* macroName,
-                        SourceLineInfo const& lineInfo,
-                        char const* capturedExpression,
-                        ResultDisposition::Flags resultDisposition,
-                        char const* secondArg = "" );
-        ~ResultBuilder();
+class ResultBuilder : public DecomposedExpression {
+ public:
+  ResultBuilder(char const *macroName, SourceLineInfo const &lineInfo,
+                char const *capturedExpression,
+                ResultDisposition::Flags resultDisposition,
+                char const *secondArg = "");
+  ~ResultBuilder();
 
-        template<typename T>
-        ExpressionLhs<T const&> operator <= ( T const& operand );
-        ExpressionLhs<bool> operator <= ( bool value );
+  template <typename T>
+  ExpressionLhs<T const &> operator<=(T const &operand);
+  ExpressionLhs<bool> operator<=(bool value);
 
-        template<typename T>
-        ResultBuilder& operator << ( T const& value ) {
-            m_stream.oss << value;
-            return *this;
-        }
+  template <typename T>
+  ResultBuilder &operator<<(T const &value) {
+    m_stream.oss << value;
+    return *this;
+  }
 
-        ResultBuilder& setResultType( ResultWas::OfType result );
-        ResultBuilder& setResultType( bool result );
+  ResultBuilder &setResultType(ResultWas::OfType result);
+  ResultBuilder &setResultType(bool result);
 
-        void endExpression( DecomposedExpression const& expr );
+  void endExpression(DecomposedExpression const &expr);
 
-        virtual void reconstructExpression( std::string& dest ) const CATCH_OVERRIDE;
+  virtual void reconstructExpression(std::string &dest) const CATCH_OVERRIDE;
 
-        AssertionResult build() const;
-        AssertionResult build( DecomposedExpression const& expr ) const;
+  AssertionResult build() const;
+  AssertionResult build(DecomposedExpression const &expr) const;
 
-        void useActiveException( ResultDisposition::Flags resultDisposition = ResultDisposition::Normal );
-        void captureResult( ResultWas::OfType resultType );
-        void captureExpression();
-        void captureExpectedException( std::string const& expectedMessage );
-        void captureExpectedException( Matchers::Impl::MatcherBase<std::string> const& matcher );
-        void handleResult( AssertionResult const& result );
-        void react();
-        bool shouldDebugBreak() const;
-        bool allowThrows() const;
+  void useActiveException(
+      ResultDisposition::Flags resultDisposition = ResultDisposition::Normal);
+  void captureResult(ResultWas::OfType resultType);
+  void captureExpression();
+  void captureExpectedException(std::string const &expectedMessage);
+  void captureExpectedException(
+      Matchers::Impl::MatcherBase<std::string> const &matcher);
+  void handleResult(AssertionResult const &result);
+  void react();
+  bool shouldDebugBreak() const;
+  bool allowThrows() const;
 
-        template<typename ArgT, typename MatcherT>
-        void captureMatch( ArgT const& arg, MatcherT const& matcher, char const* matcherString );
+  template <typename ArgT, typename MatcherT>
+  void captureMatch(ArgT const &arg, MatcherT const &matcher,
+                    char const *matcherString);
 
-        void setExceptionGuard();
-        void unsetExceptionGuard();
+  void setExceptionGuard();
+  void unsetExceptionGuard();
 
-    private:
-        AssertionInfo m_assertionInfo;
-        AssertionResultData m_data;
-        CopyableStream m_stream;
+ private:
+  AssertionInfo m_assertionInfo;
+  AssertionResultData m_data;
+  CopyableStream m_stream;
 
-        bool m_shouldDebugBreak;
-        bool m_shouldThrow;
-        bool m_guardException;
-    };
+  bool m_shouldDebugBreak;
+  bool m_shouldThrow;
+  bool m_guardException;
+};
 
-} // namespace Catch
+}  // namespace Catch
 
 // Include after due to circular dependency:
 #include "catch_expression_lhs.hpp"
 
 namespace Catch {
 
-    template<typename T>
-    inline ExpressionLhs<T const&> ResultBuilder::operator <= ( T const& operand ) {
-        return ExpressionLhs<T const&>( *this, operand );
-    }
+template <typename T>
+inline ExpressionLhs<T const &> ResultBuilder::operator<=(T const &operand) {
+  return ExpressionLhs<T const &>(*this, operand);
+}
 
-    inline ExpressionLhs<bool> ResultBuilder::operator <= ( bool value ) {
-        return ExpressionLhs<bool>( *this, value );
-    }
+inline ExpressionLhs<bool> ResultBuilder::operator<=(bool value) {
+  return ExpressionLhs<bool>(*this, value);
+}
 
-    template<typename ArgT, typename MatcherT>
-    inline void ResultBuilder::captureMatch( ArgT const& arg, MatcherT const& matcher,
-                                             char const* matcherString ) {
-        MatchExpression<ArgT const&, MatcherT const&> expr( arg, matcher, matcherString );
-        setResultType( matcher.match( arg ) );
-        endExpression( expr );
-    }
+template <typename ArgT, typename MatcherT>
+inline void ResultBuilder::captureMatch(ArgT const &arg,
+                                        MatcherT const &matcher,
+                                        char const *matcherString) {
+  MatchExpression<ArgT const &, MatcherT const &> expr(arg, matcher,
+                                                       matcherString);
+  setResultType(matcher.match(arg));
+  endExpression(expr);
+}
 
+}  // namespace Catch
 
-} // namespace Catch
-
-#endif // TWOBLUECUBES_CATCH_RESULT_BUILDER_H_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_RESULT_BUILDER_H_INCLUDED

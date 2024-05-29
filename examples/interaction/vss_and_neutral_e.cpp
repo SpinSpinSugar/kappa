@@ -1,9 +1,9 @@
-/* 
+/*
   \file vss_and_neutral_e.cpp
 */
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 #ifdef WINDOWS
 #include <direct.h>
@@ -15,9 +15,9 @@
 
 #include "kappa.hpp"
 
-std::string GetCurrentWorkingDir( void ) {
+std::string GetCurrentWorkingDir(void) {
   char buff[FILENAME_MAX];
-  GetCurrentDir( buff, FILENAME_MAX );
+  GetCurrentDir(buff, FILENAME_MAX);
   std::string current_working_dir(buff);
   return current_working_dir;
 }
@@ -25,15 +25,14 @@ std::string GetCurrentWorkingDir( void ) {
 using namespace std;
 using namespace kappa;
 
-int main(int argc, char** argv) {
-
+int main(int argc, char **argv) {
   std::cout << "Start Test for Omega integrals, loading particle data" << endl;
 
   Approximation ApproximationTest{};
 
   std::string m_source = std::getenv("KAPPA_DATA_DIRECTORY");
   std::cout << "KAPPA_DATA_DIRECTORY is: " << m_source << '\n';
-  std::string particle_source    = m_source + "particles.yaml";
+  std::string particle_source = m_source + "particles.yaml";
   std::string interaction_source = m_source + "interaction.yaml";
 
   Molecule N2("N2", true, true, particle_source);
@@ -50,21 +49,53 @@ int main(int argc, char** argv) {
   std::vector<int> r_arr = {1, 4, 2, 3};
   int l, r;
 
-  std::cout << "collision-reduced mass of two electrons: " << ee.collision_mass << ", e- mass:" << e.mass << std::endl;
+  std::cout << "collision-reduced mass of two electrons: " << ee.collision_mass
+            << ", e- mass:" << e.mass << std::endl;
   std::cout << "what is it? " << Ne["_Om22_0"] << std::endl;
 
-  for (int i=0;i<4; i++) {
+  for (int i = 0; i < 4; i++) {
     l = l_arr[i];
     r = r_arr[i];
 
     std::cout << N2.name << " + " << Np.name << std::endl;
-    std::cout << "ESA: " << ApproximationTest.omega_integral(2000., N2Np, l, r, models_omega::model_omega_esa) << " " << ApproximationTest.omega_integral(10000., N2Np, l, r, models_omega::model_omega_esa) << std::endl;
-    std::cout << "RS: " << ApproximationTest.omega_integral(2000., N2Np, l, r, models_omega::model_omega_rs) << " " << ApproximationTest.omega_integral(10000., N2Np, l, r, models_omega::model_omega_rs) << std::endl;
-    std::cout << "VSS: " << ApproximationTest.omega_integral(2000., N2Np, l, r, models_omega::model_omega_vss) << " " << ApproximationTest.omega_integral(10000., N2Np, l, r, models_omega::model_omega_vss) << std::endl << std::endl;
+    std::cout << "ESA: "
+              << ApproximationTest.omega_integral(2000., N2Np, l, r,
+                                                  models_omega::model_omega_esa)
+              << " "
+              << ApproximationTest.omega_integral(10000., N2Np, l, r,
+                                                  models_omega::model_omega_esa)
+              << std::endl;
+    std::cout << "RS: "
+              << ApproximationTest.omega_integral(2000., N2Np, l, r,
+                                                  models_omega::model_omega_rs)
+              << " "
+              << ApproximationTest.omega_integral(10000., N2Np, l, r,
+                                                  models_omega::model_omega_rs)
+              << std::endl;
+    std::cout << "VSS: "
+              << ApproximationTest.omega_integral(2000., N2Np, l, r,
+                                                  models_omega::model_omega_vss)
+              << " "
+              << ApproximationTest.omega_integral(10000., N2Np, l, r,
+                                                  models_omega::model_omega_vss)
+              << std::endl
+              << std::endl;
 
     std::cout << N.name << " + " << e.name << std::endl;
-    std::cout << "ESA: " << ApproximationTest.omega_integral(2000., Ne, l, r, models_omega::model_omega_esa) << " " << ApproximationTest.omega_integral(10000., Ne, l, r, models_omega::model_omega_esa) << std::endl;
-    std::cout << "RS: " << ApproximationTest.omega_integral(2000., Ne, l, r, models_omega::model_omega_rs) << " " << ApproximationTest.omega_integral(10000., Ne, l, r, models_omega::model_omega_rs) << std::endl;
+    std::cout << "ESA: "
+              << ApproximationTest.omega_integral(2000., Ne, l, r,
+                                                  models_omega::model_omega_esa)
+              << " "
+              << ApproximationTest.omega_integral(10000., Ne, l, r,
+                                                  models_omega::model_omega_esa)
+              << std::endl;
+    std::cout << "RS: "
+              << ApproximationTest.omega_integral(2000., Ne, l, r,
+                                                  models_omega::model_omega_rs)
+              << " "
+              << ApproximationTest.omega_integral(10000., Ne, l, r,
+                                                  models_omega::model_omega_rs)
+              << std::endl;
     std::cout << std::endl;
   }
 

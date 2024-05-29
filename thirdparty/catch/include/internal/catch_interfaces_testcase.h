@@ -8,33 +8,38 @@
 #ifndef TWOBLUECUBES_CATCH_INTERFACES_TESTCASE_H_INCLUDED
 #define TWOBLUECUBES_CATCH_INTERFACES_TESTCASE_H_INCLUDED
 
-#include "catch_ptr.hpp"
-
 #include <vector>
+
+#include "catch_ptr.hpp"
 
 namespace Catch {
 
-    class TestSpec;
+class TestSpec;
 
-    struct ITestCase : IShared {
-        virtual void invoke () const = 0;
-    protected:
-        virtual ~ITestCase();
-    };
+struct ITestCase : IShared {
+  virtual void invoke() const = 0;
 
-    class TestCase;
-    struct IConfig;
+ protected:
+  virtual ~ITestCase();
+};
 
-    struct ITestCaseRegistry {
-        virtual ~ITestCaseRegistry();
-        virtual std::vector<TestCase> const& getAllTests() const = 0;
-        virtual std::vector<TestCase> const& getAllTestsSorted( IConfig const& config ) const = 0;
-    };
+class TestCase;
+struct IConfig;
 
-    bool matchTest( TestCase const& testCase, TestSpec const& testSpec, IConfig const& config );
-    std::vector<TestCase> filterTests( std::vector<TestCase> const& testCases, TestSpec const& testSpec, IConfig const& config );
-    std::vector<TestCase> const& getAllTestCasesSorted( IConfig const& config );
+struct ITestCaseRegistry {
+  virtual ~ITestCaseRegistry();
+  virtual std::vector<TestCase> const &getAllTests() const = 0;
+  virtual std::vector<TestCase> const &getAllTestsSorted(
+      IConfig const &config) const = 0;
+};
 
-}
+bool matchTest(TestCase const &testCase, TestSpec const &testSpec,
+               IConfig const &config);
+std::vector<TestCase> filterTests(std::vector<TestCase> const &testCases,
+                                  TestSpec const &testSpec,
+                                  IConfig const &config);
+std::vector<TestCase> const &getAllTestCasesSorted(IConfig const &config);
 
-#endif // TWOBLUECUBES_CATCH_INTERFACES_TESTCASE_H_INCLUDED
+}  // namespace Catch
+
+#endif  // TWOBLUECUBES_CATCH_INTERFACES_TESTCASE_H_INCLUDED

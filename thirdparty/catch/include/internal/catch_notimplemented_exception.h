@@ -12,24 +12,24 @@
 
 namespace Catch {
 
-    class NotImplementedException : public std::exception
-    {
-    public:
-        NotImplementedException( SourceLineInfo const& lineInfo );
-        NotImplementedException( NotImplementedException const& ) {}
+class NotImplementedException : public std::exception {
+ public:
+  NotImplementedException(SourceLineInfo const &lineInfo);
+  NotImplementedException(NotImplementedException const &) {}
 
-        virtual ~NotImplementedException() CATCH_NOEXCEPT {}
+  virtual ~NotImplementedException() CATCH_NOEXCEPT {}
 
-        virtual const char* what() const CATCH_NOEXCEPT;
+  virtual const char *what() const CATCH_NOEXCEPT;
 
-    private:
-        std::string m_what;
-        SourceLineInfo m_lineInfo;
-    };
+ private:
+  std::string m_what;
+  SourceLineInfo m_lineInfo;
+};
 
-} // end namespace Catch
+}  // end namespace Catch
 
 ///////////////////////////////////////////////////////////////////////////////
-#define CATCH_NOT_IMPLEMENTED throw Catch::NotImplementedException( CATCH_INTERNAL_LINEINFO )
+#define CATCH_NOT_IMPLEMENTED \
+  throw Catch::NotImplementedException(CATCH_INTERNAL_LINEINFO)
 
-#endif // TWOBLUECUBES_CATCH_NOTIMPLEMENTED_EXCEPTION_H_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_NOTIMPLEMENTED_EXCEPTION_H_INCLUDED

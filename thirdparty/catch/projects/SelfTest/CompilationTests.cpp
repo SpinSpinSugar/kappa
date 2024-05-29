@@ -7,22 +7,21 @@
 
 #include "catch.hpp"
 
-
 // This is a minimal example for an issue we have found in 1.7.0
 struct foo {
-    int i;
+  int i;
 };
 
 template <typename T>
-bool operator==(const T& val, foo f){
-    return val == f.i;
+bool operator==(const T &val, foo f) {
+  return val == f.i;
 }
 
 TEST_CASE("#809") {
-    foo f; f.i = 42;
-    REQUIRE(42 == f);
+  foo f;
+  f.i = 42;
+  REQUIRE(42 == f);
 }
-
 
 // ------------------------------------------------------------------
 // Changes to REQUIRE_THROWS_AS made it stop working in a template in
@@ -30,43 +29,42 @@ TEST_CASE("#809") {
 // To prevent these from happening in the future, this needs to compile
 
 void throws_int(bool b) {
-    if (b) {
-        throw 1;
-    }
+  if (b) {
+    throw 1;
+  }
 }
 
 template <typename T>
 bool templated_tests(T t) {
-    int a = 3;
-    REQUIRE(a == t);
-    CHECK(a == t);
-    REQUIRE_THROWS(throws_int(true));
-    CHECK_THROWS_AS(throws_int(true), const int&);
-    REQUIRE_NOTHROW(throws_int(false));
-    REQUIRE_THAT("aaa", Catch::EndsWith("aaa"));
-    return true;
+  int a = 3;
+  REQUIRE(a == t);
+  CHECK(a == t);
+  REQUIRE_THROWS(throws_int(true));
+  CHECK_THROWS_AS(throws_int(true), const int &);
+  REQUIRE_NOTHROW(throws_int(false));
+  REQUIRE_THAT("aaa", Catch::EndsWith("aaa"));
+  return true;
 }
 
-TEST_CASE("#833") {
-    REQUIRE(templated_tests<int>(3));
-}
+TEST_CASE("#833") { REQUIRE(templated_tests<int>(3)); }
 
-// Test containing example where original stream insertable check breaks compilation
-#if defined (CATCH_CONFIG_CPP11_STREAM_INSERTABLE_CHECK)
+// Test containing example where original stream insertable check breaks
+// compilation
+#if defined(CATCH_CONFIG_CPP11_STREAM_INSERTABLE_CHECK)
 namespace {
-    struct A {};
-    std::ostream& operator<< (std::ostream &o, const A &) { return o << 0; }
+struct A {};
+std::ostream &operator<<(std::ostream &o, const A &) { return o << 0; }
 
-    struct B : private A {
-        bool operator== (int) const { return true; }
-    };
+struct B : private A {
+  bool operator==(int) const { return true; }
+};
 
-    B f ();
-    std::ostream g ();
-}
+B f();
+std::ostream g();
+}  // namespace
 
-TEST_CASE( "#872" ) {
-    B x;
-    REQUIRE (x == 4);
+TEST_CASE("#872") {
+  B x;
+  REQUIRE(x == 4);
 }
 #endif

@@ -8,44 +8,37 @@
 #ifndef TWOBLUECUBES_CATCH_SECTION_HPP_INCLUDED
 #define TWOBLUECUBES_CATCH_SECTION_HPP_INCLUDED
 
-#include "catch_section.h"
 #include "catch_capture.hpp"
 #include "catch_compiler_capabilities.h"
+#include "catch_section.h"
 
 namespace Catch {
 
-    SectionInfo::SectionInfo
-        (   SourceLineInfo const& _lineInfo,
-            std::string const& _name,
-            std::string const& _description )
-    :   name( _name ),
-        description( _description ),
-        lineInfo( _lineInfo )
-    {}
+SectionInfo::SectionInfo(SourceLineInfo const &_lineInfo,
+                         std::string const &_name,
+                         std::string const &_description)
+    : name(_name), description(_description), lineInfo(_lineInfo) {}
 
-    Section::Section( SectionInfo const& info )
-    :   m_info( info ),
-        m_sectionIncluded( getResultCapture().sectionStarted( m_info, m_assertions ) )
-    {
-        m_timer.start();
-    }
+Section::Section(SectionInfo const &info)
+    : m_info(info),
+      m_sectionIncluded(
+          getResultCapture().sectionStarted(m_info, m_assertions)) {
+  m_timer.start();
+}
 
-    Section::~Section() {
-        if( m_sectionIncluded ) {
-            SectionEndInfo endInfo( m_info, m_assertions, m_timer.getElapsedSeconds() );
-            if( std::uncaught_exception() )
-                getResultCapture().sectionEndedEarly( endInfo );
-            else
-                getResultCapture().sectionEnded( endInfo );
-        }
-    }
+Section::~Section() {
+  if (m_sectionIncluded) {
+    SectionEndInfo endInfo(m_info, m_assertions, m_timer.getElapsedSeconds());
+    if (std::uncaught_exception())
+      getResultCapture().sectionEndedEarly(endInfo);
+    else
+      getResultCapture().sectionEnded(endInfo);
+  }
+}
 
-    // This indicates whether the section should be executed or not
-    Section::operator bool() const {
-        return m_sectionIncluded;
-    }
+// This indicates whether the section should be executed or not
+Section::operator bool() const { return m_sectionIncluded; }
 
+}  // end namespace Catch
 
-} // end namespace Catch
-
-#endif // TWOBLUECUBES_CATCH_SECTION_HPP_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_SECTION_HPP_INCLUDED

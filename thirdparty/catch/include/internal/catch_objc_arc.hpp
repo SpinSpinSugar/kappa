@@ -16,36 +16,32 @@
 #define CATCH_ARC_ENABLED 0
 #endif
 
-void arcSafeRelease( NSObject* obj );
-id performOptionalSelector( id obj, SEL sel );
+void arcSafeRelease(NSObject *obj);
+id performOptionalSelector(id obj, SEL sel);
 
 #if !CATCH_ARC_ENABLED
-inline void arcSafeRelease( NSObject* obj ) {
-    [obj release];
-}
-inline id performOptionalSelector( id obj, SEL sel ) {
-    if( [obj respondsToSelector: sel] )
-        return [obj performSelector: sel];
-    return nil;
+inline void arcSafeRelease(NSObject *obj) { [obj release]; }
+inline id performOptionalSelector(id obj, SEL sel) {
+  if ([obj respondsToSelector:sel]) return [obj performSelector:sel];
+  return nil;
 }
 #define CATCH_UNSAFE_UNRETAINED
 #define CATCH_ARC_STRONG
 #else
-inline void arcSafeRelease( NSObject* ){}
-inline id performOptionalSelector( id obj, SEL sel ) {
+inline void arcSafeRelease(NSObject *) {}
+inline id performOptionalSelector(id obj, SEL sel) {
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 #endif
-    if( [obj respondsToSelector: sel] )
-        return [obj performSelector: sel];
+  if ([obj respondsToSelector:sel]) return [obj performSelector:sel];
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
-    return nil;
+  return nil;
 }
 #define CATCH_UNSAFE_UNRETAINED __unsafe_unretained
 #define CATCH_ARC_STRONG __strong
 #endif
 
-#endif // TWOBLUECUBES_CATCH_OBJC_ARC_HPP_INCLUDED
+#endif  // TWOBLUECUBES_CATCH_OBJC_ARC_HPP_INCLUDED
