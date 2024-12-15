@@ -4,7 +4,7 @@ add_sources(kappa++
 	approximation.cpp
 	approximation_multit.cpp
 	approximation_onet.cpp
-    wrapper.hpp
+    #wrapper.hpp
     )
 
 install(FILES approximation.hpp 	    DESTINATION include/kappa++)
@@ -15,4 +15,4 @@ install(FILES exceptions.hpp 		    DESTINATION include/kappa++)
 install(FILES kappa.hpp 		        DESTINATION include/kappa++)
 install(FILES logging.hpp 		        DESTINATION include/kappa++)
 install(FILES models.h 			        DESTINATION include/kappa++)
-install(FILES wrapper.hpp		        DESTINATION include/kappa++)
+#install(FILES wrapper.hpp		        DESTINATION include/kappa++)
