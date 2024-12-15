@@ -5188,10 +5188,11 @@ void k_Arrh_diss(double T, double *k_O_diss, double *k_O2_diss) {
 }
 double result_O2[36];
 double *k_diss_vector(double T) {
+  kappa::Approximation appr{};
   for (int i = 0; i < 36; ++i) {
-    result_O2[i] = kappa::Approximation::k_diss(
-        T, external_call_O2, interaction_O2_O2, i,
-        kappa::models_k_diss::model_k_diss_tm_infty_arrh_scanlon);
+    result_O2[i] =
+        appr.k_diss(T, external_call_O2, interaction_O2_O2, i,
+                    kappa::models_k_diss::model_k_diss_tm_infty_arrh_scanlon);
   }
   return result_O2;
 }
