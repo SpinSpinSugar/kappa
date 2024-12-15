@@ -4,6 +4,8 @@
 
 #include "approximation.hpp"
 
+#include <numeric>
+
 kappa::Approximation::Approximation() {}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4871,6 +4873,14 @@ double kappa::Approximation::k_diss(double T, kappa::Molecule const &molecule,
 // (interface)
 double kappa::Approximation::k_bf_VT(double T, kappa::Molecule const &molecule,
                                      int i, int delta_i, int e) {
+#if 1
+  // #ifdef KAPPA_STRICT_CHECKS
+  if ((i + delta_i < 0) or (i + delta_i > 35)) {
+    std::cout << i << " " << delta_i << "\n";
+    throw kappa::IncorrectValueException("Bad i and delta_i");
+  }
+// #endif
+#endif
   return p_k_bf_VT(T, molecule.vibr_energy[e][i],
                    molecule.vibr_energy[e][i + delta_i],
                    molecule.rot_energy[e][i], molecule.num_rot_levels[e][i],
@@ -5148,6 +5158,7 @@ const double kappa::Approximation::cc_ar[5] = {0., 1., 1.5, 1.83333333,
 const double kappa::Approximation::cc_cl[5] = {
     0.5, 1., 1.1666666666666667, 1.333333333333333, 1.43333333333333};
 
+namespace external_call {
 static const std::string path = "/home/chansons/Repositories/kappa/data/";
 static const std::string particles = path + "particles.yaml";
 static const std::string interactions = path + "interaction.yaml";
@@ -5160,7 +5171,9 @@ static const kappa::Interaction interaction_O_O2{
 static const kappa::Interaction interaction_O2_O2{
     external_call_O2, external_call_O2, interactions};
 
+}  // namespace external_call
 extern "C" {
+using namespace external_call;
 void k_Arrh_diss(double T, double *k_O_diss, double *k_O2_diss) {
   *k_O_diss = kappa::Approximation::k_Arrhenius(
       T, interaction_O_O2["diss," + external_call_O2.name + ",Arrh_A,Scanlon"],
@@ -5173,6 +5186,100 @@ void k_Arrh_diss(double T, double *k_O_diss, double *k_O2_diss) {
       interaction_O2_O2["diss," + external_call_O2.name + ",Ea,Scanlon"]);
   // std::cout << "KAPPA_RES: " << res << '\n';
 }
+double result_O2[36];
+double *k_diss_vector(double T) {
+  for (int i = 0; i < 36; ++i) {
+    result_O2[i] = kappa::Approximation::k_diss(
+        T, external_call_O2, interaction_O2_O2, i,
+        kappa::models_k_diss::model_k_diss_tm_infty_arrh_scanlon);
+  }
+  return result_O2;
+}
+
+double initial_distribution_O2_buffer[36];
+double *initial_distribution_O2(double n, double T0) {
+  const auto mol = external_call_O2;
+  kappa::Approximation appr{};
+  auto distrib = appr.Boltzmann_distribution(T0, n, mol);
+  for (int i = 0; i < 36; ++i) initial_distribution_O2_buffer[i] = distrib[i];
+  return initial_distribution_O2_buffer;
+}
+
+double R_O2_O_buff[36 + 1];  // 36 O2 + 1 O levels
+double k_O2_O_vt_down_buff[36];
+double k_O2_O_vt_up_buff[36];
+double k_O2_O2_vt_down_buff[36];
+double k_O2_O2_vt_up_buff[36];
+
+void calc_R_O2_VT_i(double T, const double *n_O2_O_ptr) {
+  const auto inter_m_a = interaction_O_O2;
+  const auto inter_m_m = interaction_O2_O2;
+  kappa::Approximation appr{};
+  const auto mol = external_call_O2;
+  const auto model = kappa::models_k_vt::model_k_vt_ssh;
+  const int O2_LEVELS = 36;
+  for (int i = 1; i < O2_LEVELS; ++i) {
+    k_O2_O_vt_down_buff[i - 1] = appr.k_VT(T, mol, inter_m_a, i, -1, model);
+    // std::cout << k_O2_O_vt_down_buff[i - 1] << " ";
+    k_O2_O2_vt_down_buff[i - 1] = appr.k_VT(T, mol, inter_m_m, i, -1, model);
+  }
+  for (int i = 0; i < O2_LEVELS - 1; ++i) {
+    k_O2_O_vt_up_buff[i] = k_O2_O_vt_down_buff[i] * appr.k_bf_VT(T, mol, i, 1);
+    k_O2_O2_vt_up_buff[i] =
+        k_O2_O2_vt_down_buff[i] * appr.k_bf_VT(T, mol, i, 1);
+  }
+
+  const double n_O2 = std::accumulate(n_O2_O_ptr, n_O2_O_ptr + 35, 0.0);
+  const double n_O = n_O2_O_ptr[36];
+  R_O2_O_buff[0] += n_O * (n_O2_O_ptr[1] * k_O2_O_vt_down_buff[0] -
+                           n_O2_O_ptr[0] * (k_O2_O_vt_up_buff[0]));
+  R_O2_O_buff[0] += n_O2 * (n_O2_O_ptr[1] * k_O2_O2_vt_down_buff[0] -
+                            n_O2_O_ptr[0] * (k_O2_O2_vt_up_buff[0]));
+  for (int i = 1; i < O2_LEVELS - 1; i++) {
+    const double first_term =
+        n_O *
+        (n_O2_O_ptr[i + 1] * k_O2_O_vt_down_buff[i] +
+         n_O2_O_ptr[i - 1] * k_O2_O_vt_up_buff[i - 1] -
+         n_O2_O_ptr[i] * (k_O2_O_vt_up_buff[i] + k_O2_O_vt_down_buff[i - 1]));
+    const double second_term =
+        n_O2 *
+        (n_O2_O_ptr[i + 1] * k_O2_O2_vt_down_buff[i] +
+         n_O2_O_ptr[i - 1] * k_O2_O2_vt_up_buff[i - 1] -
+         n_O2_O_ptr[i] * (k_O2_O2_vt_up_buff[i] + k_O2_O2_vt_down_buff[i]));
+    const double res = first_term + second_term;
+    R_O2_O_buff[i] += res;
+  }
+  R_O2_O_buff[O2_LEVELS - 1] +=
+      n_O * (n_O2_O_ptr[34] * k_O2_O_vt_up_buff[34] -
+             n_O2_O_ptr[35] * (k_O2_O_vt_down_buff[34]));
+  R_O2_O_buff[O2_LEVELS - 1] +=
+      n_O2 * (n_O2_O_ptr[34] * k_O2_O2_vt_up_buff[34] -
+              n_O2_O_ptr[35] * (k_O2_O2_vt_down_buff[34]));
+}
+
+double *R_O2_O_i_vector(double T, const double *n_O2_O_ptr) {
+  const double n_O = n_O2_O_ptr[36];
+  for (int i = 0; i < 37; ++i) {
+    R_O2_O_buff[i] = 0;
+  }
+  calc_R_O2_VT_i(T, n_O2_O_ptr);
+  // calc_R_O2_VV_i(T, n_O2_O_ptr, n_O);
+  // calc_R_O2_diss_i(T, n_O2_O_ptr, n_O);
+  // implement
+  // R_O2_O_buff[36] = calc_R_O();
+  return R_O2_O_buff;
+}
+
+double eps_O2_i[36];
+double *get_eps_O2_i() {
+  for (int i = 0; i < 36; ++i) {
+    eps_O2_i[i] = external_call_O2.level_vibr_energies.at(i);
+    // std::cout <<  eps_O2_i[i] << "\n";
+  }
+  return eps_O2_i;
+}
+
+int test_call() { return 0; }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
